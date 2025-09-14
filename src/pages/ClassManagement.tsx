@@ -16,6 +16,8 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import SubjectForm from '@/components/SubjectForm';
 import ClassForm from '@/components/ClassForm';
+import ScheduleForm from '@/components/ScheduleForm'; // New import
+import ScheduleList from '@/components/ScheduleList'; // New import
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -61,6 +63,7 @@ const fetchClasses = async (): Promise<Class[]> => {
 const ClassManagement = () => {
   const [isSubjectFormOpen, setIsSubjectFormOpen] = useState(false);
   const [isClassFormOpen, setIsClassFormOpen] = useState(false);
+  const [isScheduleFormOpen, setIsScheduleFormOpen] = useState(false); // New state for schedule form
 
   const { data: subjects, isLoading: isLoadingSubjects, error: subjectsError, refetch: refetchSubjects } = useQuery<Subject[], Error>({
     queryKey: ['subjects'],
@@ -72,6 +75,13 @@ const ClassManagement = () => {
     queryFn: fetchClasses,
   });
 
+  // We need to refetch schedules when a new one is added
+  const { refetch: refetchSchedules } = useQuery({
+    queryKey: ['schedules'],
+    queryFn: () => Promise.resolve([]), // Placeholder, actual fetch is in ScheduleList
+    enabled: false, // Disable initial fetch here
+  });
+
   const handleSubjectAdded = () => {
     refetchSubjects();
     setIsSubjectFormOpen(false);
@@ -80,6 +90,11 @@ const ClassManagement = () => {
   const handleClassAdded = () => {
     refetchClasses();
     setIsClassFormOpen(false);
+  };
+
+  const handleScheduleAdded = () => {
+    refetchSchedules(); // Refetch schedules after adding a new one
+    setIsScheduleFormOpen(false);
   };
 
   if (isLoadingSubjects || isLoadingClasses) {
@@ -112,10 +127,11 @@ const ClassManagement = () => {
       <h2 className="text-3xl font-bold">Classes & Timetable</h2>
 
       <Tabs defaultValue="classes">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
           <TabsList>
             <TabsTrigger value="classes">Classes</TabsTrigger>
             <TabsTrigger value="subjects">Subjects</TabsTrigger>
+            <TabsTrigger value="timetable">Timetable</TabsTrigger> {/* New tab trigger */}
           </TabsList>
           <div className="flex gap-2">
             <Dialog open={isClassFormOpen} onOpenChange={setIsClassFormOpen}>
@@ -142,6 +158,19 @@ const ClassManagement = () => {
                   <DialogTitle>Add New Subject</DialogTitle>
                 </DialogHeader>
                 <SubjectForm onSuccess={handleSubjectAdded} />
+              </DialogContent>
+            </Dialog>
+            <Dialog open={isScheduleFormOpen} onOpenChange={setIsScheduleFormOpen}> {/* New dialog for schedule form */}
+              <DialogTrigger asChild>
+                <Button variant="outline" onClick={() => setIsScheduleFormOpen(true)}>
+                  <PlusCircle className="mr-2 h-4 w-4" /> Add Schedule
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Add New Class Schedule</DialogTitle>
+                </DialogHeader>
+                <ScheduleForm onSuccess={handleScheduleAdded} />
               </DialogContent>
             </Dialog>
           </div>
@@ -209,6 +238,10 @@ const ClassManagement = () => {
               </TableBody>
             </Table>
           </div>
+        </TabsContent>
+
+        <TabsContent value="timetable"> {/* New tab content for timetable */}
+          <ScheduleList />
         </TabsContent>
       </Tabs>
     </div>
