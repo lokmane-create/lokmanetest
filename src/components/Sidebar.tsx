@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Home, Users, Book, Calendar, ClipboardCheck, GraduationCap, Parent, LogOut, Settings } from 'lucide-react';
+import { Home, Users, Book, Calendar, ClipboardCheck, GraduationCap, UsersRound, LogOut, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/integrations/supabase/auth';
 import { Button } from '@/components/ui/button';
@@ -43,7 +43,7 @@ const Sidebar = () => {
     { to: '/classes', icon: Book, label: 'Classes & Timetable', allowedRoles: ['admin', 'teacher'] },
     { to: '/attendance', icon: ClipboardCheck, label: 'Attendance Tracking', allowedRoles: ['admin', 'teacher'] },
     { to: '/grades', icon: GraduationCap, label: 'Grades & Exams', allowedRoles: ['admin', 'teacher'] },
-    { to: '/parent-portal', icon: Parent, label: 'Parent Portal', allowedRoles: ['parent'] },
+    { to: '/parent-portal', icon: UsersRound, label: 'Parent Portal', allowedRoles: ['parent'] },
     // { to: '/settings', icon: Settings, label: 'Settings', allowedRoles: ['admin'] }, // Future feature
   ];
 
@@ -92,7 +92,7 @@ export const MobileSidebar = () => {
     { to: '/classes', icon: Book, label: 'Classes & Timetable', allowedRoles: ['admin', 'teacher'] },
     { to: '/attendance', icon: ClipboardCheck, label: 'Attendance Tracking', allowedRoles: ['admin', 'teacher'] },
     { to: '/grades', icon: GraduationCap, label: 'Grades & Exams', allowedRoles: ['admin', 'teacher'] },
-    { to: '/parent-portal', icon: Parent, label: 'Parent Portal', allowedRoles: ['parent'] },
+    { to: '/parent-portal', icon: UsersRound, label: 'Parent Portal', allowedRoles: ['parent'] },
   ];
 
   return (
