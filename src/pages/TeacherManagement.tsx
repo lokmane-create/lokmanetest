@@ -112,7 +112,11 @@ const TeacherManagement = () => {
                   <TableCell>{teacher.first_name}</TableCell>
                   <TableCell>{teacher.last_name}</TableCell>
                   <TableCell>{teacher.subject_specialty || 'N/A'}</TableCell>
-                  <TableCell>{format(new Date(teacher.created_at), 'PPpp')}</TableCell>
+                  <TableCell>
+                    {teacher.created_at && !isNaN(new Date(teacher.created_at).getTime())
+                      ? format(new Date(teacher.created_at), 'PPpp')
+                      : 'N/A'}
+                  </TableCell>
                 </TableRow>
               ))
             )}

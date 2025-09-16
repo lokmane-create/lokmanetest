@@ -21,7 +21,7 @@ interface Schedule {
   start_time: string;
   end_time: string;
   created_at: string;
-  classes: { name: string }; // Joined data
+  classes: { name: string } | null; // Joined data
 }
 
 const fetchSchedules = async (): Promise<Schedule[]> => {
@@ -93,7 +93,11 @@ const ScheduleList = () => {
                 <TableCell>{daysOfWeekMap[schedule.day_of_week]}</TableCell>
                 <TableCell>{schedule.start_time}</TableCell>
                 <TableCell>{schedule.end_time}</TableCell>
-                <TableCell>{format(new Date(schedule.created_at), 'PPpp')}</TableCell>
+                <TableCell>
+                  {schedule.created_at && !isNaN(new Date(schedule.created_at).getTime())
+                    ? format(new Date(schedule.created_at), 'PPpp')
+                    : 'N/A'}
+                </TableCell>
               </TableRow>
             ))
           )}

@@ -26,9 +26,9 @@ interface AttendanceRecord {
   status: string;
   recorded_by: string;
   created_at: string;
-  students: { first_name: string; last_name: string; student_id: string };
-  classes: { name: string };
-  profiles: { first_name: string; last_name: string };
+  students: { first_name: string; last_name: string; student_id: string } | null;
+  classes: { name: string } | null;
+  profiles: { first_name: string; last_name: string } | null;
 }
 
 const fetchAttendanceRecords = async (): Promise<AttendanceRecord[]> => {
@@ -118,13 +118,21 @@ const AttendanceTracking = () => {
             ) : (
               attendanceRecords?.map((record) => (
                 <TableRow key={record.id}>
-                  <TableCell className="font-medium">{format(new Date(record.date), 'PPP')}</TableCell>
+                  <TableCell className="font-medium">
+                    {record.date && !isNaN(new Date(record.date).getTime())
+                      ? format(new Date(record.date), 'PPP')
+                      : 'N/A'}
+                  </TableCell>
                   <TableCell>{record.classes?.name || 'N/A'}</TableCell>
                   <TableCell>{record.students ? `${record.students.first_name} ${record.students.last_name}` : 'N/A'}</TableCell>
                   <TableCell>{record.students?.student_id || 'N/A'}</TableCell>
                   <TableCell>{record.status}</TableCell>
                   <TableCell>{record.profiles ? `${record.profiles.first_name} ${record.profiles.last_name}` : 'N/A'}</TableCell>
-                  <TableCell>{format(new Date(record.created_at), 'PPpp')}</TableCell>
+                  <TableCell>
+                    {record.created_at && !isNaN(new Date(record.created_at).getTime())
+                      ? format(new Date(record.created_at), 'PPpp')
+                      : 'N/A'}
+                  </TableCell>
                 </TableRow>
               ))
             )}

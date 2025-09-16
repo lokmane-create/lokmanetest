@@ -23,7 +23,7 @@ interface Student {
   first_name: string;
   last_name: string;
   student_id: string;
-  date_of_birth: string;
+  date_of_birth: string | null; // Can be null
   grade_level: number;
   created_at: string;
 }
@@ -113,9 +113,17 @@ const StudentManagement = () => {
                   <TableCell className="font-medium">{student.student_id}</TableCell>
                   <TableCell>{student.first_name}</TableCell>
                   <TableCell>{student.last_name}</TableCell>
-                  <TableCell>{format(new Date(student.date_of_birth), 'PPP')}</TableCell>
+                  <TableCell>
+                    {student.date_of_birth && !isNaN(new Date(student.date_of_birth).getTime())
+                      ? format(new Date(student.date_of_birth), 'PPP')
+                      : 'N/A'}
+                  </TableCell>
                   <TableCell>{student.grade_level}</TableCell>
-                  <TableCell>{format(new Date(student.created_at), 'PPpp')}</TableCell>
+                  <TableCell>
+                    {student.created_at && !isNaN(new Date(student.created_at).getTime())
+                      ? format(new Date(student.created_at), 'PPpp')
+                      : 'N/A'}
+                  </TableCell>
                 </TableRow>
               ))
             )}

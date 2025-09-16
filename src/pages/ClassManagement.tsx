@@ -202,7 +202,11 @@ const ClassManagement = () => {
                       <TableCell>{cls.teachers ? `${cls.teachers.first_name} ${cls.teachers.last_name}` : 'N/A'}</TableCell>
                       <TableCell>{cls.grade_level || 'N/A'}</TableCell>
                       <TableCell>{cls.room_number || 'N/A'}</TableCell>
-                      <TableCell>{format(new Date(cls.created_at), 'PPpp')}</TableCell>
+                      <TableCell>
+                        {cls.created_at && !isNaN(new Date(cls.created_at).getTime())
+                          ? format(new Date(cls.created_at), 'PPpp')
+                          : 'N/A'}
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
@@ -231,7 +235,11 @@ const ClassManagement = () => {
                     <TableRow key={subject.id}>
                       <TableCell className="font-medium">{subject.name}</TableCell>
                       <TableCell>{subject.description || 'N/A'}</TableCell>
-                      <TableCell>{format(new Date(subject.created_at), 'PPpp')}</TableCell>
+                      <TableCell>
+                        {subject.created_at && !isNaN(new Date(subject.created_at).getTime())
+                          ? format(new Date(subject.created_at), 'PPpp')
+                          : 'N/A'}
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
