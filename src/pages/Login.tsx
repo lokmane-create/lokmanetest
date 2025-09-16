@@ -9,73 +9,36 @@ import { useAuth } from '@/integrations/supabase/auth';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { QrCode, Globe } from 'lucide-react';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { showError, showSuccess } from '@/utils/toast';
 
-const arabicLocalization = {
-  variables: {
-    sign_in: {
-      email_label: "البريد الإلكتروني",
-      password_label: "كلمة المرور",
-      email_input_placeholder: "أدخل البريد الإلكتروني",
-      password_input_placeholder: "أدخل كلمة المرور",
-      button_label: "تسجيل الدخول",
-      social_auth_typography: "أو سجل الدخول باستخدام",
-      link_text: "هل نسيت كلمة المرور؟",
-      confirmation_code_label: "رمز التأكيد",
-      confirmation_code_input_placeholder: "أدخل رمز التأكيد",
-      social_provider_text: "تسجيل الدخول بـ {{provider}}",
-    },
-    sign_up: {
-      email_label: "البريد الإلكتروني",
-      password_label: "كلمة المرور",
-      email_input_placeholder: "أدخل البريد الإلكتروني",
-      password_input_placeholder: "أدخل كلمة المرور",
-      button_label: "إنشاء حساب",
-      social_auth_typography: "أو أنشئ حسابًا باستخدام",
-      link_text: "هل لديك حساب بالفعل؟ تسجيل الدخول",
-      confirmation_code_label: "رمز التأكيد",
-      confirmation_code_input_placeholder: "أدخل رمز التأكيد",
-      social_provider_text: "إنشاء حساب بـ {{provider}}",
-    },
-    forgotten_password: {
-      email_label: "البريد الإلكتروني",
-      password_label: "كلمة المرور الجديدة",
-      email_input_placeholder: "أدخل البريد الإلكتروني",
-      button_label: "إرسال تعليمات إعادة تعيين كلمة المرور",
-      link_text: "تذكرت كلمة المرور؟ تسجيل الدخول",
-      confirmation_code_label: "رمز التأكيد",
-      confirmation_code_input_placeholder: "أدخل رمز التأكيد",
-    },
-    update_password: {
-      password_label: "كلمة المرور الجديدة",
-      password_input_placeholder: "أدخل كلمة المرور الجديدة",
-      button_label: "تحديث كلمة المرور",
-    },
-    magic_link: {
-      email_input_placeholder: "أدخل البريد الإلكتروني",
-      button_label: "إرسال رابط سحري",
-      link_text: "تسجيل الدخول بكلمة المرور",
-    },
-    verify_otp: {
-      email_input_placeholder: "أدخل البريد الإلكتروني",
-      phone_input_placeholder: "أدخل رقم الهاتف",
-      token_input_placeholder: "أدخل رمز OTP",
-      email_label: "البريد الإلكتروني",
-      phone_label: "رقم الهاتف",
-      token_label: "رمز OTP",
-      button_label: "تأكيد",
-      link_text: "تسجيل الدخول بكلمة المرور",
-    },
-    update_email: {
-      new_email_label: "البريد الإلكتروني الجديد",
-      new_email_input_placeholder: "أدخل البريد الإلكتروني الجديد",
-      button_label: "تحديث البريد الإلكتروني",
-    },
-  },
-};
+const formSchema = z.object({
+  email: z.string().email({ message: "البريد الإلكتروني غير صالح." }),
+  password: z.string().min(6, { message: "كلمة المرور يجب أن تتكون من 6 أحرف على الأقل." }),
+});
 
 const Login = () => {
   const navigate = useNavigate();
   const { session, loading } = useAuth();
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   useEffect(() => {
     if (!loading && session) {
@@ -92,13 +55,34 @@ const Login = () => {
   }
 
   const demoAccounts = [
-    "مدير النظام",
-    "مدير المدرسة",
-    "أحمد محمد",
-    "سارة أحمد",
-    "محمد علي",
-    "فاطمة حسن"
+    { name: "مدير النظام", email: "admin@school.com", password: "demo123" },
+    { name: "مدير المدرسة", email: "principal@school.com", password: "demo123" },
+    { name: "أحمد محمد", email: "ahmed@school.com", password: "demo123" },
+    { name: "سارة أحمد", email: "sara@school.com", password: "demo123" },
+    { name: "محمد علي", email: "mohamed@school.com", password: "demo123" },
+    { name: "فاطمة حسن", email: "fatima@school.com", password: "demo123" }
   ];
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: values.email,
+      password: values.password,
+    });
+
+    if (error) {
+      showError(`فشل تسجيل الدخول: ${error.message}`);
+      console.error("Login error:", error);
+    } else {
+      showSuccess("تم تسجيل الدخول بنجاح!");
+      navigate('/');
+    }
+  };
+
+  const handleDemoLogin = (account: typeof demoAccounts[0]) => {
+    form.setValue("email", account.email);
+    form.setValue("password", account.password);
+    form.handleSubmit(onSubmit)();
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4 font-cairo text-right">
@@ -111,31 +95,52 @@ const Login = () => {
         <CardContent className="space-y-4">
           <h3 className="text-2xl font-bold text-center mb-6 text-foreground">تسجيل الدخول</h3>
           <p className="text-sm text-muted-foreground text-center mb-4">أدخل بياناتك للوصول إلى النظام</p>
-          <Auth
-            supabaseClient={supabase}
-            providers={[]} // Only email/password for now
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: 'hsl(var(--primary))', // Use the primary color from tailwind config
-                    brandAccent: 'hsl(var(--primary-foreground))', // Use the primary-foreground color
-                  },
-                },
-              },
-            }}
-            theme="light" // Use light theme, can be dynamic later
-            redirectTo={window.location.origin} // Redirect to home after login
-            localization={arabicLocalization}
-          />
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>البريد الإلكتروني</FormLabel>
+                    <FormControl>
+                      <Input placeholder="أدخل البريد الإلكتروني" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>كلمة المرور</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="أدخل كلمة المرور" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full">
+                تسجيل الدخول
+              </Button>
+            </form>
+          </Form>
         </CardContent>
         <CardFooter className="flex flex-col gap-4 p-6 border-t">
           <div className="w-full text-center">
             <h4 className="text-lg font-semibold mb-2 text-foreground">حسابات تجريبية (كلمة المرور: demo123)</h4>
-            <ul className="list-disc list-inside text-muted-foreground text-sm">
+            <ul className="list-disc list-inside text-muted-foreground text-sm space-y-2">
               {demoAccounts.map((account, index) => (
-                <li key={index}>{account}</li>
+                <li key={index} className="flex items-center justify-between">
+                  <span>{account.name} ({account.email})</span>
+                  <Button variant="outline" size="sm" onClick={() => handleDemoLogin(account)}>
+                    تسجيل الدخول
+                  </Button>
+                </li>
               ))}
             </ul>
           </div>
