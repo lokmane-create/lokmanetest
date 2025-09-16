@@ -3,7 +3,7 @@
 import React from 'react';
 import { useAuth } from '@/integrations/supabase/auth';
 import { Button } from '@/components/ui/button';
-import { Bot, Users, ClipboardCheck, GraduationCap, DollarSign } from 'lucide-react'; // Added DollarSign
+import { Bot, Users, ClipboardCheck, GraduationCap, DollarSign } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -26,6 +26,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { demoData } from '@/lib/fakeData';
+import { format } from 'date-fns';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -33,31 +35,50 @@ const Dashboard = () => {
   const userEmail = user?.email;
   const userFirstName = user?.user_metadata?.first_name;
 
-  // Placeholder data for charts and tables
-  const attendanceLineData = {
-    labels: ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"],
-    series: [{ name: "حضور", data: [100, 105, 102, 104, 101] }],
-  };
+  // Using generated demo data
+  const totalStudents = demoData.students.length;
+  const totalTeachers = demoData.teachers.length;
+  const totalStaff = demoData.hrStaff.length;
+  const todayAttendanceCount = demoData.attendanceRecords.filter(rec => format(new Date(rec.date), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') && rec.status === 'Present').length;
+  const averageGrade = (demoData.grades.reduce((sum, grade) => sum + grade.score, 0) / demoData.grades.length).toFixed(1);
+  const totalRevenueMonth = demoData.financeTransactions
+    .filter(t => t.type === "رسوم دراسية" && new Date(t.date).getMonth() === new Date().getMonth())
+    .reduce((sum, t) => sum + parseFloat(t.amount.replace(' ر.س', '')), 0);
+
+  // Attendance Line Chart Data (simulated for last 5 days)
+  const attendanceLineData = [
+    { label: "الإثنين", attendance: Math.floor(Math.random() * 10) + 90 },
+    { label: "الثلاثاء", attendance: Math.floor(Math.random() * 10) + 90 },
+    { label: "الأربعاء", attendance: Math.floor(Math.random() * 10) + 90 },
+    { label: "الخميس", attendance: Math.floor(Math.random() * 10) + 90 },
+    { label: "الجمعة", attendance: Math.floor(Math.random() * 10) + 90 },
+  ];
+
+  // Grade Pie Chart Data
+  const gradeDistribution = demoData.grades.reduce((acc, grade) => {
+    if (grade.score >= 85) acc.A++;
+    else if (grade.score >= 70) acc.B++;
+    else if (grade.score >= 50) acc.C++;
+    else acc.D_E++;
+    return acc;
+  }, { A: 0, B: 0, C: 0, D_E: 0 });
 
   const gradePieData = [
-    { name: "A (85-100)", value: 20, fill: "hsl(var(--primary))" },
-    { name: "B (70-84)", value: 50, fill: "hsl(var(--secondary))" },
-    { name: "C (50-69)", value: 35, fill: "hsl(var(--accent))" },
-    { name: "D/E", value: 15, fill: "hsl(var(--destructive))" },
+    { name: `A (85-100) - ${gradeDistribution.A}`, value: gradeDistribution.A, fill: "hsl(var(--primary))" },
+    { name: `B (70-84) - ${gradeDistribution.B}`, value: gradeDistribution.B, fill: "hsl(var(--secondary))" },
+    { name: `C (50-69) - ${gradeDistribution.C}`, value: gradeDistribution.C, fill: "hsl(var(--accent))" },
+    { name: `D/E - ${gradeDistribution.D_E}`, value: gradeDistribution.D_E, fill: "hsl(var(--destructive))" },
   ];
 
-  const studentsTableData = [
-    { id: 1, name: "أحمد محمد", class: "الصف 1", email: "ahmed@student.local", attendance: 96, avgGrade: 88 },
-    { id: 2, name: "سارة أحمد", class: "الصف 1", email: "sara@student.local", attendance: 92, avgGrade: 84 },
-    { id: 3, name: "محمد علي", class: "الصف 2", email: "mohamed@student.local", attendance: 89, avgGrade: 76 },
-    { id: 4, name: "فاطمة حسن", class: "الصف 2", email: "fatima@student.local", attendance: 94, avgGrade: 90 },
-    { id: 5, name: "علي خالد", class: "الصف 3", email: "ali@student.local", attendance: 85, avgGrade: 70 },
-    { id: 6, name: "ميساء عبد", class: "الصف 3", email: "maysa@student.local", attendance: 98, avgGrade: 92 },
-    { id: 7, name: "هاجر سمير", class: "الصف 1", email: "hajar@student.local", attendance: 90, avgGrade: 79 },
-    { id: 8, name: "يوسف جمال", class: "الصف 2", email: "yousef@student.local", attendance: 88, avgGrade: 73 },
-    { id: 9, name: "لميس أيمن", class: "الصف 1", email: "lamees@student.local", attendance: 95, "avgGrade": 86 },
-    { id: 10, name: "رامي نبيل", class: "الصف 3", email: "rami@student.local", attendance: 82, avgGrade: 68 }
-  ];
+  // Student List for Dashboard (first 10 students)
+  const studentsTableData = demoData.students.slice(0, 10).map(student => ({
+    id: student.id,
+    name: `${student.first_name} ${student.last_name}`,
+    class: `الصف ${student.grade_level}`,
+    email: student.email,
+    attendance: student.attendance,
+    avgGrade: student.avgGrade,
+  }));
 
   return (
     <div className="space-y-6">
@@ -82,7 +103,7 @@ const Dashboard = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">120</div>
+            <div className="text-2xl font-bold">{totalStudents}</div>
             <p className="text-xs text-muted-foreground">+4% عن الشهر الماضي</p>
           </CardContent>
         </Card>
@@ -92,7 +113,7 @@ const Dashboard = () => {
             <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">104</div>
+            <div className="text-2xl font-bold">{todayAttendanceCount}</div>
             <p className="text-xs text-muted-foreground">-2% عن الأمس</p>
           </CardContent>
         </Card>
@@ -102,7 +123,7 @@ const Dashboard = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">50,000 ر.س</div>
+            <div className="text-2xl font-bold">{totalRevenueMonth.toLocaleString('ar-SA')} ر.س</div>
             <p className="text-xs text-muted-foreground">+10% عن الشهر الماضي</p>
           </CardContent>
         </Card>
@@ -124,10 +145,7 @@ const Dashboard = () => {
             }} className="aspect-video h-[250px]">
               <LineChart
                 accessibilityLayer
-                data={attendanceLineData.series[0].data.map((d, i) => ({
-                  label: attendanceLineData.labels[i],
-                  attendance: d,
-                }))}
+                data={attendanceLineData}
                 margin={{
                   left: 12,
                   right: 12,
@@ -202,7 +220,6 @@ const Dashboard = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>الرقم</TableHead>
                   <TableHead>الاسم</TableHead>
                   <TableHead>الصف</TableHead>
                   <TableHead>البريد الإلكتروني</TableHead>
@@ -214,7 +231,6 @@ const Dashboard = () => {
               <TableBody>
                 {studentsTableData.map((student) => (
                   <TableRow key={student.id}>
-                    <TableCell>{student.id}</TableCell>
                     <TableCell>{student.name}</TableCell>
                     <TableCell>{student.class}</TableCell>
                     <TableCell>{student.email}</TableCell>
@@ -239,7 +255,7 @@ const Dashboard = () => {
         </CardHeader>
         <CardContent>
           <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-            <li>آخر تسجيل: 5 دقائق مضت بواسطة مدير النظام</li>
+            <li>آخر تسجيل: {format(new Date(), 'HH:mm')} مضت بواسطة مدير النظام</li>
             <li>تنبيه: غياب 3 طلاب هذا الأسبوع</li>
             <li>تذكير: إدخال درجات الفصل قبل 10 مايو</li>
           </ul>

@@ -1,19 +1,49 @@
 "use client";
 
-import React from 'react';
-import { MessageSquare, Send } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { MessageSquare, Send, User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+import { demoData } from '@/lib/fakeData'; // Import demo data
+
+interface Message {
+  id: string;
+  sender: string;
+  text: string;
+  timestamp: string;
+  senderRole?: string;
+}
 
 const Chat = () => {
-  // Placeholder for chat messages
-  const messages = [
-    { id: 1, sender: 'Admin', text: 'مرحباً بالجميع، تذكير باجتماع الغد الساعة 10 صباحاً.', timestamp: '10:00 AM' },
-    { id: 2, sender: 'Teacher', text: 'تم استلام التذكير، شكراً.', timestamp: '10:05 AM' },
-    { id: 3, sender: 'Student', text: 'هل يمكنني إرسال الواجب متأخراً؟', timestamp: '11:30 AM' },
-  ];
+  const [messages, setMessages] = useState<Message[]>(demoData.chatMessages);
+  const [input, setInput] = useState('');
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  const handleSendMessage = () => {
+    if (input.trim()) {
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        sender: "أنا (المستخدم الحالي)", // Placeholder for current user
+        text: input.trim(),
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        senderRole: "User", // Placeholder role
+      };
+      setMessages((prev) => [...prev, newMessage]);
+      setInput('');
+    }
+  };
+
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTo({
+        top: scrollAreaRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [messages]);
 
   return (
     <div className="flex flex-col h-full space-y-6">
@@ -33,33 +63,58 @@ const Chat = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex-1 p-4 overflow-hidden">
-          <ScrollArea className="h-full pr-4">
+          <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
             <div className="space-y-4">
               {messages.map((message) => (
-                <div key={message.id} className="flex items-start gap-2">
+                <div
+                  key={message.id}
+                  className={cn(
+                    "flex items-start gap-2",
+                    message.senderRole === 'User' ? 'justify-end' : 'justify-start'
+                  )}
+                >
+                  {message.senderRole !== 'User' && <UserIcon className="h-6 w-6 text-muted-foreground shrink-0" />}
                   <div className="flex flex-col">
-                    <span className="font-semibold text-sm">{message.sender}</span>
-                    <div className="bg-muted p-3 rounded-lg max-w-[70%]">
+                    <span className={cn("font-semibold text-sm", message.senderRole === 'User' ? 'text-right' : 'text-left')}>{message.sender}</span>
+                    <div
+                      className={cn(
+                        "p-3 rounded-lg max-w-[70%]",
+                        message.senderRole === 'User'
+                          ? 'bg-user-chat-bubble text-user-chat-foreground rounded-br-none'
+                          : 'bg-assistant-chat-bubble text-assistant-chat-foreground rounded-bl-none'
+                      )}
+                    >
                       <p className="text-sm">{message.text}</p>
                       <span className="block text-xs text-right mt-1 opacity-70">
                         {message.timestamp}
                       </span>
                     </div>
                   </div>
+                  {message.senderRole === 'User' && <UserIcon className="h-6 w-6 text-muted-foreground shrink-0" />}
                 </div>
               ))}
             </div>
           </ScrollArea>
         </CardContent>
-        <div className="border-t p-4">
+        <CardFooter className="border-t p-4">
           <div className="flex w-full items-center space-x-2">
-            <Input placeholder="اكتب رسالتك هنا..." className="flex-1" />
-            <Button>
+            <Input
+              placeholder="اكتب رسالتك هنا..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleSendMessage();
+                }
+              }}
+              className="flex-1"
+            />
+            <Button onClick={handleSendMessage} disabled={!input.trim()}>
               <Send className="h-4 w-4" />
               <span className="sr-only">إرسال</span>
             </Button>
           </div>
-        </div>
+        </CardFooter>
       </Card>
     </div>
   );

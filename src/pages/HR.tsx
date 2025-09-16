@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Users, FileText, DollarSign } from 'lucide-react';
+import { PlusCircle, Users, FileText, DollarSign, Download } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -18,14 +18,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { demoData } from '@/lib/fakeData'; // Import demo data
 
 const HR = () => {
-  // Placeholder data
-  const staffMembers = [
-    { id: 1, name: "أ. نورة سالم", role: "معلمة رياضيات", contract: "دائم", salary: "3500 ر.س" },
-    { id: 2, name: "أ. خالد مراد", role: "معلم علوم", contract: "دائم", salary: "3800 ر.س" },
-    { id: 3, name: "السيدة ليلى", role: "إدارية", contract: "مؤقت", salary: "2500 ر.س" },
-  ];
+  // Using generated demo data
+  const staffMembers = demoData.hrStaff;
+  const totalStaff = staffMembers.length;
+  const activeContracts = staffMembers.filter(member => member.contract !== 'مؤقت').length; // Simplified active contracts
+  const totalMonthlyPayroll = staffMembers.reduce((sum, member) => sum + parseFloat(member.salary.replace(' ر.س', '')), 0);
 
   return (
     <div className="space-y-6">
@@ -45,7 +45,7 @@ const HR = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">25</div>
+            <div className="text-2xl font-bold">{totalStaff}</div>
             <p className="text-xs text-muted-foreground">+2 موظف جديد هذا العام</p>
           </CardContent>
         </Card>
@@ -55,7 +55,7 @@ const HR = () => {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">23</div>
+            <div className="text-2xl font-bold">{activeContracts}</div>
             <p className="text-xs text-muted-foreground">2 عقد ينتهي قريباً</p>
           </CardContent>
         </Card>
@@ -65,7 +65,7 @@ const HR = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">85,000 ر.س</div>
+            <div className="text-2xl font-bold">{totalMonthlyPayroll.toLocaleString('ar-SA')} ر.س</div>
             <p className="text-xs text-muted-foreground">يشمل جميع الموظفين</p>
           </CardContent>
         </Card>
@@ -74,9 +74,14 @@ const HR = () => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>قائمة الموظفين</CardTitle>
-          <Button variant="outline" size="sm">
-            <PlusCircle className="mr-2 h-4 w-4" /> إضافة موظف
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm">
+              <Download className="mr-2 h-4 w-4" /> تصدير (CSV)
+            </Button>
+            <Button variant="default" size="sm">
+              <PlusCircle className="mr-2 h-4 w-4" /> إضافة موظف
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">

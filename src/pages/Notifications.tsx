@@ -18,14 +18,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { demoData } from '@/lib/fakeData'; // Import demo data
+import { format } from 'date-fns';
 
 const Notifications = () => {
-  // Placeholder data
-  const announcements = [
-    { id: 1, title: "تذكير باجتماع أولياء الأمور", date: "2024-09-15", target: "الجميع" },
-    { id: 2, title: "إجازة اليوم الوطني", date: "2024-09-23", target: "الجميع" },
-    { id: 3, title: "تغيير جدول حصة الرياضيات", date: "2024-09-10", target: "طلاب الصف 1" },
-  ];
+  // Using generated demo data
+  const announcements = demoData.notifications.filter(n => n.type === "Announcement");
+  const aiAlerts = demoData.notifications.filter(n => n.type === "AI Alert");
 
   return (
     <div className="space-y-6">
@@ -60,7 +59,11 @@ const Notifications = () => {
                 {announcements.map((announcement) => (
                   <TableRow key={announcement.id}>
                     <TableCell>{announcement.title}</TableCell>
-                    <TableCell>{announcement.date}</TableCell>
+                    <TableCell>
+                      {announcement.date && !isNaN(new Date(announcement.date).getTime())
+                        ? format(new Date(announcement.date), 'PPP')
+                        : 'N/A'}
+                    </TableCell>
                     <TableCell>{announcement.target}</TableCell>
                     <TableCell className="text-center">
                       <Button variant="ghost" size="sm">عرض</Button>
@@ -80,8 +83,15 @@ const Notifications = () => {
         </CardHeader>
         <CardContent>
           <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-            <li>تنبيه: انخفاض حضور الطالب أحمد محمد هذا الأسبوع.</li>
-            <li>تنبيه: 3 طلاب لديهم درجات منخفضة في اختبار الرياضيات الأخير.</li>
+            {aiAlerts.length === 0 ? (
+              <li>لا توجد تنبيهات حالياً من الذكاء الاصطناعي.</li>
+            ) : (
+              aiAlerts.map((alert) => (
+                <li key={alert.id}>
+                  <strong>{alert.title}:</strong> {alert.content} (بتاريخ {format(new Date(alert.date), 'PPP')})
+                </li>
+              ))
+            )}
           </ul>
         </CardContent>
       </Card>

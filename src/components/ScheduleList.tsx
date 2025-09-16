@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
+import { demoData } from '@/lib/fakeData'; // Import demo data
 
 interface Schedule {
   id: string;
@@ -24,26 +25,20 @@ interface Schedule {
   classes: { name: string } | null; // Joined data
 }
 
+// Mock fetch function using demoData
 const fetchSchedules = async (): Promise<Schedule[]> => {
-  const { data, error } = await supabase
-    .from('schedules')
-    .select('*, classes(name)')
-    .order('day_of_week', { ascending: true })
-    .order('start_time', { ascending: true });
-  if (error) {
-    throw new Error(error.message);
-  }
-  return data;
+  await new Promise(resolve => setTimeout(resolve, 300));
+  return demoData.schedules as Schedule[];
 };
 
 const daysOfWeekMap: { [key: number]: string } = {
-  0: "Sunday",
-  1: "Monday",
-  2: "Tuesday",
-  3: "Wednesday",
-  4: "Thursday",
-  5: "Friday",
-  6: "Saturday",
+  0: "الأحد",
+  1: "الإثنين",
+  2: "الثلاثاء",
+  3: "الأربعاء",
+  4: "الخميس",
+  5: "الجمعة",
+  6: "السبت",
 };
 
 const ScheduleList = () => {
@@ -74,17 +69,17 @@ const ScheduleList = () => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Class Name</TableHead>
-            <TableHead>Day</TableHead>
-            <TableHead>Start Time</TableHead>
-            <TableHead>End Time</TableHead>
-            <TableHead>Created At</TableHead>
+            <TableHead>اسم الحصة</TableHead>
+            <TableHead>اليوم</TableHead>
+            <TableHead>وقت البدء</TableHead>
+            <TableHead>وقت الانتهاء</TableHead>
+            <TableHead>تاريخ الإنشاء</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {schedules?.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="text-center">No schedules found.</TableCell>
+              <TableCell colSpan={5} className="text-center">لا يوجد جداول حصص.</TableCell>
             </TableRow>
           ) : (
             schedules?.map((schedule) => (

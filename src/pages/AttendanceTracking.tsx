@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import AttendanceForm from '@/components/AttendanceForm';
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
+import { demoData } from '@/lib/fakeData'; // Import demo data
 
 interface AttendanceRecord {
   id: string;
@@ -31,16 +32,10 @@ interface AttendanceRecord {
   profiles: { first_name: string; last_name: string } | null;
 }
 
+// Mock fetch function using demoData
 const fetchAttendanceRecords = async (): Promise<AttendanceRecord[]> => {
-  const { data, error } = await supabase
-    .from('attendance')
-    .select('*, students(first_name, last_name, student_id), classes(name), profiles(first_name, last_name)')
-    .order('date', { ascending: false })
-    .order('created_at', { ascending: false });
-  if (error) {
-    throw new Error(error.message);
-  }
-  return data;
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return demoData.attendanceRecords as AttendanceRecord[];
 };
 
 const AttendanceTracking = () => {
@@ -51,7 +46,7 @@ const AttendanceTracking = () => {
   });
 
   const handleAttendanceRecorded = () => {
-    refetch();
+    // In a real app, this would trigger a refetch from the actual DB
     setIsFormOpen(false);
   };
 
@@ -59,7 +54,7 @@ const AttendanceTracking = () => {
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-3xl font-bold">Attendance Tracking</h2>
+          <h2 className="text-3xl font-bold">تتبع الحضور</h2>
           <Skeleton className="h-10 w-32" />
         </div>
         <div className="rounded-md border p-4">
@@ -81,16 +76,16 @@ const AttendanceTracking = () => {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold">Attendance Tracking</h2>
+        <h2 className="text-3xl font-bold">تتبع الحضور</h2>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
             <Button variant="default" onClick={() => setIsFormOpen(true)}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Record Attendance
+              <PlusCircle className="mr-2 h-4 w-4" /> تسجيل الحضور
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
-              <DialogTitle>Record New Attendance</DialogTitle>
+              <DialogTitle>تسجيل حضور جديد</DialogTitle>
             </DialogHeader>
             <AttendanceForm onSuccess={handleAttendanceRecorded} />
           </DialogContent>
@@ -101,19 +96,19 @@ const AttendanceTracking = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Class</TableHead>
-              <TableHead>Student Name</TableHead>
-              <TableHead>Student ID</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Recorded By</TableHead>
-              <TableHead>Recorded At</TableHead>
+              <TableHead>التاريخ</TableHead>
+              <TableHead>الحصة</TableHead>
+              <TableHead>اسم الطالب</TableHead>
+              <TableHead>رقم الطالب</TableHead>
+              <TableHead>الحالة</TableHead>
+              <TableHead>سجل بواسطة</TableHead>
+              <TableHead>تاريخ التسجيل</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {attendanceRecords?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center">No attendance records found.</TableCell>
+                <TableCell colSpan={7} className="text-center">لا يوجد سجلات حضور.</TableCell>
               </TableRow>
             ) : (
               attendanceRecords?.map((record) => (

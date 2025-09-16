@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, FileText, DollarSign, BarChart } from 'lucide-react';
+import { PlusCircle, FileText, DollarSign, BarChart, Download } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -18,15 +18,26 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { demoData } from '@/lib/fakeData'; // Import demo data
+import { format } from 'date-fns';
 
 const Finance = () => {
-  // Placeholder data
-  const recentTransactions = [
-    { id: 1, type: "رسوم دراسية", amount: "5000 ر.س", date: "2024-09-01", status: "مدفوع" },
-    { id: 2, type: "راتب معلم", amount: "3500 ر.س", date: "2024-09-05", status: "مدفوع" },
-    { id: 3, type: "مستلزمات مكتبية", amount: "250 ر.س", date: "2024-09-07", status: "مدفوع" },
-    { id: 4, type: "رسوم دراسية", amount: "5000 ر.س", date: "2024-09-10", status: "معلق" },
-  ];
+  // Using generated demo data
+  const recentTransactions = demoData.financeTransactions.slice(0, 5); // Show first 5 for recent
+  const allTransactions = demoData.financeTransactions;
+
+  const totalRevenue = allTransactions
+    .filter(t => t.type === "رسوم دراسية" && t.status === "مدفوع")
+    .reduce((sum, t) => sum + parseFloat(t.amount.replace(' ر.س', '')), 0);
+
+  const totalExpenses = allTransactions
+    .filter(t => t.type !== "رسوم دراسية" && t.status === "مدفوع")
+    .reduce((sum, t) => sum + parseFloat(t.amount.replace(' ر.س', '')), 0);
+
+  const pendingPayments = allTransactions
+    .filter(t => t.status === "معلق")
+    .reduce((sum, t) => sum + parseFloat(t.amount.replace(' ر.س', '')), 0);
+  const pendingCount = allTransactions.filter(t => t.status === "معلق").length;
 
   return (
     <div className="space-y-6">
@@ -42,21 +53,21 @@ const Finance = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي الإيرادات (الشهر)</CardTitle>
+            <CardTitle className="text-sm font-medium">إجمالي الإيرادات</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">50,000 ر.س</div>
+            <div className="text-2xl font-bold">{totalRevenue.toLocaleString('ar-SA')} ر.س</div>
             <p className="text-xs text-muted-foreground">+10% عن الشهر الماضي</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي المصروفات (الشهر)</CardTitle>
+            <CardTitle className="text-sm font-medium">إجمالي المصروفات</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">32,000 ر.س</div>
+            <div className="text-2xl font-bold">{totalExpenses.toLocaleString('ar-SA')} ر.س</div>
             <p className="text-xs text-muted-foreground">+5% عن الشهر الماضي</p>
           </CardContent>
         </Card>
@@ -66,8 +77,8 @@ const Finance = () => {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">18,000 ر.س</div>
-            <p className="text-xs text-muted-foreground">4 فواتير معلقة</p>
+            <div className="text-2xl font-bold">{pendingPayments.toLocaleString('ar-SA')} ر.س</div>
+            <p className="text-xs text-muted-foreground">{pendingCount} فواتير معلقة</p>
           </CardContent>
         </Card>
       </div>
@@ -75,9 +86,14 @@ const Finance = () => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>المعاملات الأخيرة</CardTitle>
-          <Button variant="outline" size="sm">
-            <PlusCircle className="mr-2 h-4 w-4" /> إضافة معاملة
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm">
+              <Download className="mr-2 h-4 w-4" /> تصدير (CSV)
+            </Button>
+            <Button variant="default" size="sm">
+              <PlusCircle className="mr-2 h-4 w-4" /> إضافة معاملة
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
@@ -96,7 +112,11 @@ const Finance = () => {
                   <TableRow key={transaction.id}>
                     <TableCell>{transaction.type}</TableCell>
                     <TableCell>{transaction.amount}</TableCell>
-                    <TableCell>{transaction.date}</TableCell>
+                    <TableCell>
+                      {transaction.date && !isNaN(new Date(transaction.date).getTime())
+                        ? format(new Date(transaction.date), 'PPP')
+                        : 'N/A'}
+                    </TableCell>
                     <TableCell>{transaction.status}</TableCell>
                     <TableCell className="text-center">
                       <Button variant="ghost" size="sm">عرض</Button>

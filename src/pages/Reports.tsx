@@ -18,14 +18,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { demoData } from '@/lib/fakeData'; // Import demo data
+import { format } from 'date-fns';
 
 const Reports = () => {
-  // Placeholder data
-  const availableReports = [
-    { id: 1, name: "تقرير الحضور الشهري", description: "ملخص حضور الطلاب لكل شهر.", type: "attendance" },
-    { id: 2, name: "تحليل اتجاهات الدرجات", description: "تتبع أداء الطلاب بمرور الوقت.", type: "grades" },
-    { id: 3, name: "ملخص مالي سنوي", description: "نظرة عامة على الإيرادات والمصروفات السنوية.", type: "finance" },
-  ];
+  // Using generated demo data
+  const availableReports = demoData.reports;
 
   return (
     <div className="space-y-6">
@@ -50,24 +48,36 @@ const Reports = () => {
                 <TableRow>
                   <TableHead>اسم التقرير</TableHead>
                   <TableHead>الوصف</TableHead>
+                  <TableHead>تاريخ الإنشاء</TableHead>
                   <TableHead className="text-center">إجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {availableReports.map((report) => (
-                  <TableRow key={report.id}>
-                    <TableCell className="font-medium">{report.name}</TableCell>
-                    <TableCell>{report.description}</TableCell>
-                    <TableCell className="text-center">
-                      <Button variant="outline" size="sm" className="mr-2">
-                        <FileText className="h-4 w-4 mr-2" /> عرض
-                      </Button>
-                      <Button variant="default" size="sm">
-                        <Download className="h-4 w-4 mr-2" /> تصدير (PDF/Excel)
-                      </Button>
-                    </TableCell>
+                {availableReports.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center">لا توجد تقارير متاحة.</TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  availableReports.map((report) => (
+                    <TableRow key={report.id}>
+                      <TableCell className="font-medium">{report.name}</TableCell>
+                      <TableCell>{report.description}</TableCell>
+                      <TableCell>
+                        {report.generated_at && !isNaN(new Date(report.generated_at).getTime())
+                          ? format(new Date(report.generated_at), 'PPpp')
+                          : 'N/A'}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Button variant="outline" size="sm" className="mr-2">
+                          <FileText className="h-4 w-4 mr-2" /> عرض
+                        </Button>
+                        <Button variant="default" size="sm">
+                          <Download className="h-4 w-4 mr-2" /> تصدير (PDF/Excel)
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
