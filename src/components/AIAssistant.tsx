@@ -23,81 +23,108 @@ const AIAssistant: React.FC = () => {
   const [input, setInput] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const denyMessage = "عذراً، ليس لديك صلاحية للوصول إلى هذه المعلومات.";
+  const defaultDenyMessage = "عذراً، ليس لديك صلاحية للوصول إلى هذه المعلومات. يمكنني إرسال طلب إذن إلى مدير النظام إذا رغبت.";
 
-  const roleAwareness = {
+  const rolePolicies = {
     Admin: {
-      permissions: [
-        "view_all_students", "view_all_teachers", "view_statistics",
-        "generate_reports", "access_internal_data", "strategic_recommendations"
-      ],
+      allowedData: ["all_students", "all_teachers", "financials", "hr_records", "system_logs"],
+      allowedActions: ["generate_reports", "export_all", "configure_system", "issue_notifications", "create_accounts"],
       examples: [
-        { query: "توليد تقرير شامل عن الحضور الشهري.", response: "بالتأكيد، جاري توليد تقرير الحضور الشهري الشامل. سأقوم بتسليمه لك قريباً." },
-        { query: "أعطني مقارنة بين نتائج الصف الأول والصف الثاني.", response: "جاري تحليل ومقارنة نتائج الصف الأول والثاني. سأعرض لك أبرز الفروقات والتشابهات." },
-        { query: "اعرض لي قائمة الطلاب ذوي الأداء المنخفض.", response: "جاري استعراض بيانات الطلاب لتحديد ذوي الأداء المنخفض. سأقدم لك القائمة مع تفاصيل إضافية." },
-      ]
+        { input: "انشئ تقرير حضور شهري مفصل وارفقه كـ PDF", assistant: "سأنشئ تقرير حضور شهري مفصل لجميع الصفوف وإرفاقه كـ PDF. هل تريد تضمين تفاصيل الطلاب (الأسماء، أرقام الهوية) أم ملخصًا تجميعيًا فقط؟" },
+        { input: "اعطني ملخص مالي لهذا الشهر", assistant: "إليك ملخص الإيرادات مقابل المصروفات للشهر الجاري: الإيرادات: 45,000 ر.س - المصروفات: 27,200 ر.س. صافي: 17,800 ر.س. هل ترغب في تفصيل الفواتير؟" }
+      ],
+      tone: "formal, strategic and data-driven"
     },
     Principal: {
-      permissions: [
-        "view_all_students", "view_teachers", "generate_reports", "view_statistics"
-      ],
+      allowedData: ["all_students", "all_teachers", "aggregate_financials"],
+      allowedActions: ["generate_reports", "view_dashboards", "issue_school_notifications"],
       examples: [
-        { query: "أعطني إحصائيات الأداء العام لكل الصفوف.", response: "جاري تجميع إحصائيات الأداء العام لجميع الصفوف. سأقدم لك ملخصاً شاملاً." },
-        { query: "من هم أفضل المعلمين في نسبة الحضور؟", response: "جاري تحليل بيانات حضور المعلمين لتحديد الأفضل. سأعرض لك النتائج قريباً." },
-      ]
+        { input: "أعطني إحصائيات الأداء العام لكل الصفوف.", assistant: "جاري تجميع إحصائيات الأداء العام لجميع الصفوف. سأقدم لك ملخصاً شاملاً." },
+        { input: "من هم أفضل المعلمين في نسبة الحضور؟", assistant: "جاري تحليل بيانات حضور المعلمين لتحديد الأفضل. سأعرض لك النتائج قريباً." }
+      ],
+      tone: "formal, high-level and advisory"
     },
     Teacher: {
-      permissions: [
-        "view_class_students", "record_attendance", "analyze_class_performance"
-      ],
+      allowedData: ["class_students", "class_attendance", "class_grades"],
+      allowedActions: ["enter_grades", "record_attendance", "message_students", "request_reports_for_class"],
       examples: [
-        { query: "أعطني تقرير درجات طلاب الصف الذي أدرّسه.", response: "جاري إعداد تقرير درجات طلاب صفك. سأقدم لك التفاصيل قريباً." },
-        { query: "من الطلاب الذين تغيبوا أكثر من 3 مرات؟", response: "جاري مراجعة سجلات الحضور لتحديد الطلاب الذين تغيبوا أكثر من 3 مرات في صفك." },
-      ]
+        { input: "من تغيب اليوم من صفي؟", assistant: "اليوم غاب عن صفك 3 طلاب: رامي نبيل، مريم سالم، وسلمان حسين. هل تريد إرسال تذكير عبر الرسائل لهم أو لولي أمرهم؟" },
+        { input: "اعطني تقرير درجات صف 1", assistant: "متوسط صف 1 في آخر اختبار هو 78.6. عدد الطلاب تحت 60: 4. هل تريد تفصيل لكل طالب أو تلخيص نقاط الضعف حسب المادة؟" }
+      ],
+      tone: "helpful, concise and operational"
     },
     Student: {
-      permissions: [
-        "view_own_grades", "view_own_attendance", "view_schedule"
-      ],
+      allowedData: ["own_grades", "own_attendance", "own_schedule"],
+      allowedActions: ["view_grades", "view_schedule", "message_teachers"],
       examples: [
-        { query: "أرني درجاتي في آخر اختبار.", response: "جاري استعراض درجاتك في آخر اختبار. سأعرضها لك حالما تتوفر." },
-        { query: "كم نسبة حضوري حتى الآن؟", response: "جاري حساب نسبة حضورك حتى الآن. سأقدم لك الرقم قريباً." },
-        { query: "ما هو جدولي للأسبوع القادم؟", response: "جاري جلب جدولك للأسبوع القادم. سأعرضه لك بالتفصيل." },
-      ]
+        { input: "ما درجتي في آخر اختبار؟", assistant: "درجتك في آخر اختبار: 84. متوسط الصف: 78.6. إذا رغبت، أستطيع إظهار تمارين مراجعة لتحسين المهارات الضعيفة." },
+        { input: "كم نسبة حضوري هذا الفصل؟", assistant: "نسبة حضورك هذا الفصل هي 92%. مبروك — أنت ضمن الفئة الأعلى حضوراً." }
+      ],
+      tone: "simple, encouraging and supportive"
+    },
+    Accountant: {
+      allowedData: ["financials", "invoices"],
+      allowedActions: ["create_invoices", "export_financial_reports"],
+      examples: [
+        { input: "أرني الفواتير المستحقة.", assistant: "جاري استعراض الفواتير المستحقة. سأعرض لك قائمة بها مع تواريخ الاستحقاق." },
+        { input: "توليد تقرير مصروفات الشهر الماضي.", assistant: "بالتأكيد، جاري توليد تقرير المصروفات للشهر الماضي. هل تريد تصديره كـ Excel؟" }
+      ],
+      tone: "precise and accounting-focused"
+    },
+    HR: {
+      allowedData: ["staff_records", "payroll"],
+      allowedActions: ["manage_staff", "view_payroll"],
+      examples: [
+        { input: "كم عدد الموظفين الحاليين؟", assistant: "عدد الموظفين الحاليين هو 25 موظفاً. هل تريد تفصيلاً حسب القسم؟" },
+        { input: "عرض رواتب المعلمين.", assistant: "جاري عرض بيانات رواتب المعلمين. هل تريد تصفية حسب التخصص؟" }
+      ],
+      tone: "professional and process-focused"
     }
   };
 
   const simulateAIResponse = (userMessage: string): string => {
-    if (!userRole || !roleAwareness[userRole as keyof typeof roleAwareness]) {
-      return denyMessage;
+    const normalizedUserRole = userRole?.toLowerCase();
+    const roleConfig = rolePolicies[userRole as keyof typeof rolePolicies];
+
+    if (!roleConfig) {
+      return defaultDenyMessage;
     }
 
-    const roleConfig = roleAwareness[userRole as keyof typeof roleAwareness];
+    const lowerCaseMessage = userMessage.toLowerCase();
 
     // Check for specific examples
     for (const example of roleConfig.examples) {
-      if (userMessage.includes(example.query.toLowerCase().replace('.', ''))) {
-        return example.response;
+      if (lowerCaseMessage.includes(example.input.toLowerCase().replace('.', ''))) {
+        return example.assistant;
       }
     }
 
-    // Generic responses based on capabilities
-    if (userMessage.includes("تقرير") && roleConfig.permissions.includes("generate_reports")) {
+    // Generic responses based on allowed actions and data
+    if (lowerCaseMessage.includes("تقرير") && roleConfig.allowedActions.includes("generate_reports")) {
       return "بالتأكيد، ما نوع التقرير الذي تود توليده؟";
     }
-    if (userMessage.includes("درجات") && (roleConfig.permissions.includes("view_own_grades") || roleConfig.permissions.includes("analyze_class_performance"))) {
+    if (lowerCaseMessage.includes("درجات") && (roleConfig.allowedData.includes("own_grades") || roleConfig.allowedData.includes("class_grades"))) {
       return "هل تود معرفة درجاتك الخاصة أم درجات صف معين؟";
     }
-    if (userMessage.includes("حضور") && (roleConfig.permissions.includes("view_own_attendance") || roleConfig.permissions.includes("record_attendance") || roleConfig.permissions.includes("view_statistics"))) {
+    if (lowerCaseMessage.includes("حضور") && (roleConfig.allowedData.includes("own_attendance") || roleConfig.allowedData.includes("class_attendance"))) {
       return "ماذا تود أن تعرف عن الحضور؟";
     }
-    if (userMessage.includes("مساعدة") || userMessage.includes("كيف أستخدمك")) {
-      return `أهلاً بك! أنا مساعدك الذكي في نظام إدارة المدرسة. بصفتك ${userRole}، يمكنك أن تسألني عن: ${roleConfig.examples.map(e => `"${e.query}"`).join(', ')}.`;
+    if (lowerCaseMessage.includes("مالي") && roleConfig.allowedData.includes("financials")) {
+      return "ما المعلومات المالية التي تبحث عنها؟";
+    }
+    if (lowerCaseMessage.includes("موظفين") && roleConfig.allowedData.includes("staff_records")) {
+      return "ماذا تود أن تعرف عن الموظفين؟";
+    }
+    if (lowerCaseMessage.includes("مساعدة") || lowerCaseMessage.includes("كيف أستخدمك")) {
+      return `أهلاً بك! أنا مساعدك الذكي في نظام إدارة المدرسة. بصفتك ${userRole}، يمكنك أن تسألني عن: ${roleConfig.examples.map(e => `"${e.input}"`).join(', ')}.`;
     }
 
-    // Deny if unauthorized for a specific query
-    if (userMessage.includes("بيانات داخلية") && !roleConfig.permissions.includes("access_internal_data")) {
-      return denyMessage;
+    // Default denial if no specific match and unauthorized data/action is implied
+    const sensitiveKeywords = ["مالي", "رواتب", "عقود", "موظفين", "بيانات داخلية"];
+    const isSensitiveQuery = sensitiveKeywords.some(keyword => lowerCaseMessage.includes(keyword));
+
+    if (isSensitiveQuery && !roleConfig.allowedData.includes("all_students") && !roleConfig.allowedData.includes("financials") && !roleConfig.allowedData.includes("hr_records")) {
+      return defaultDenyMessage;
     }
 
     return "عذراً، لم أفهم طلبك. هل يمكنك إعادة صياغته أو طلب شيء آخر؟";
@@ -150,12 +177,12 @@ const AIAssistant: React.FC = () => {
             {messages.length === 0 && (
               <div className="text-center text-muted-foreground py-8">
                 <p>مرحباً بك! كيف يمكنني مساعدتك اليوم؟</p>
-                {userRole && roleAwareness[userRole as keyof typeof roleAwareness] && (
+                {userRole && rolePolicies[userRole as keyof typeof rolePolicies] && (
                   <p className="mt-2 text-sm">
                     بصفتك {userRole}، يمكنك أن تسألني عن:
                     <ul className="list-disc list-inside mt-1 text-left mx-auto max-w-xs">
-                      {roleAwareness[userRole as keyof typeof roleAwareness].examples.map((ex, i) => (
-                        <li key={i}>{ex.query}</li>
+                      {rolePolicies[userRole as keyof typeof rolePolicies].examples.map((ex, i) => (
+                        <li key={i}>{ex.input}</li>
                       ))}
                     </ul>
                   </p>

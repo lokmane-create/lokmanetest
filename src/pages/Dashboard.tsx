@@ -3,7 +3,7 @@
 import React from 'react';
 import { useAuth } from '@/integrations/supabase/auth';
 import { Button } from '@/components/ui/button';
-import { Bot, Users, ClipboardCheck, GraduationCap } from 'lucide-react';
+import { Bot, Users, ClipboardCheck, GraduationCap, DollarSign } from 'lucide-react'; // Added DollarSign
 import {
   Card,
   CardContent,
@@ -55,7 +55,7 @@ const Dashboard = () => {
     { id: 6, name: "ميساء عبد", class: "الصف 3", email: "maysa@student.local", attendance: 98, avgGrade: 92 },
     { id: 7, name: "هاجر سمير", class: "الصف 1", email: "hajar@student.local", attendance: 90, avgGrade: 79 },
     { id: 8, name: "يوسف جمال", class: "الصف 2", email: "yousef@student.local", attendance: 88, avgGrade: 73 },
-    { id: 9, name: "لميس أيمن", class: "الصف 1", email: "lamees@student.local", "attendance": 95, "avgGrade": 86 },
+    { id: 9, name: "لميس أيمن", class: "الصف 1", email: "lamees@student.local", attendance: 95, "avgGrade": 86 },
     { id: 10, name: "رامي نبيل", class: "الصف 3", email: "rami@student.local", attendance: 82, avgGrade: 68 }
   ];
 
@@ -98,12 +98,12 @@ const Dashboard = () => {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">متوسط الدرجة</CardTitle>
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">إيرادات هذا الشهر</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">78.6</div>
-            <p className="text-xs text-muted-foreground">+1.2 عن الاختبار السابق</p>
+            <div className="text-2xl font-bold">50,000 ر.س</div>
+            <p className="text-xs text-muted-foreground">+10% عن الشهر الماضي</p>
           </CardContent>
         </Card>
       </div>

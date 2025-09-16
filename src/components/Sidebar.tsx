@@ -21,7 +21,11 @@ interface NavLinkProps {
 }
 
 const NavLink: React.FC<NavLinkProps> = ({ to, icon: Icon, label, currentRole, allowedRoles, onClick }) => {
-  if (!currentRole || !allowedRoles.includes(currentRole)) {
+  // Normalize currentRole to lowercase for consistent comparison
+  const normalizedCurrentRole = currentRole?.toLowerCase();
+  const normalizedAllowedRoles = allowedRoles.map(role => role.toLowerCase());
+
+  if (!normalizedCurrentRole || !normalizedAllowedRoles.includes(normalizedCurrentRole)) {
     return null;
   }
   return (
@@ -53,11 +57,11 @@ const navigationGroups: NavigationGroup[] = [
       { icon: Home, label: "لوحة القيادة", route: "/dashboard", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'Accountant', 'HR'] },
       { icon: Users, label: "إدارة الطلاب", route: "/students", allowedRoles: ['Admin', 'Principal', 'Teacher'] },
       { icon: UserCog, label: "إدارة المعلمين", route: "/teachers", allowedRoles: ['Admin', 'Principal', 'HR'] },
-      { icon: CalendarDays, label: "الحصص والجدول", route: "/classes", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student'] } // Changed to /classes as it manages timetable
+      { icon: CalendarDays, label: "الحصص والجدول", route: "/timetable", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student'] }
     ]
   },
   {
-    title: "العمليات",
+    title: "الإدارة",
     items: [
       { icon: ClipboardCheck, label: "الحضور", route: "/attendance", allowedRoles: ['Admin', 'Principal', 'Teacher'] },
       { icon: BookOpen, label: "الدرجات والامتحانات", route: "/grades", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student'] },
