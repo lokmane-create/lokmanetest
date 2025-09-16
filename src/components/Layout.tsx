@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useAuth } from '@/integrations/supabase/auth';
 import { useNavigate } from 'react-router-dom';
 import Sidebar, { MobileSidebar } from './Sidebar';
-import { MadeWithDyad } from './made-with-dyad';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Bot } from 'lucide-react';
@@ -21,7 +20,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <p className="text-lg text-gray-700 dark:text-gray-300">جاري تحميل التطبيق...</p>
       </div>
     );
@@ -55,7 +54,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           {children}
         </main>
-        <MadeWithDyad />
+        <footer className="p-4 text-center text-sm text-muted-foreground border-t">
+          Made by lokzeg
+        </footer>
       </div>
     </div>
   );

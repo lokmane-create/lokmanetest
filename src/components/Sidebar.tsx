@@ -2,7 +2,10 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Home, Users, Book, Calendar, ClipboardCheck, GraduationCap, UsersRound, LogOut, Settings, Bot } from 'lucide-react';
+import {
+  Home, Users, UserCog, CalendarDays, ClipboardCheck, GraduationCap,
+  DollarSign, MessageSquare, Bell, BarChart, Bot, LogOut, BookOpen
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/integrations/supabase/auth';
 import { Button } from '@/components/ui/button';
@@ -15,12 +18,12 @@ interface NavLinkProps {
   label: string;
   currentRole: string | undefined;
   allowedRoles: string[];
-  onClick?: () => void; // Added for potential sidebar actions
+  onClick?: () => void;
 }
 
 const NavLink: React.FC<NavLinkProps> = ({ to, icon: Icon, label, currentRole, allowedRoles, onClick }) => {
   if (!currentRole || !allowedRoles.includes(currentRole)) {
-    return null; // Don't render if role not allowed
+    return null;
   }
   return (
     <Link
@@ -34,54 +37,79 @@ const NavLink: React.FC<NavLinkProps> = ({ to, icon: Icon, label, currentRole, a
   );
 };
 
+interface NavigationGroup {
+  title: string;
+  items: {
+    icon: React.ElementType;
+    label: string;
+    route: string;
+    allowedRoles: string[];
+  }[];
+}
+
+const navigationGroups: NavigationGroup[] = [
+  {
+    title: "الأساسيات",
+    items: [
+      { icon: Home, label: "لوحة القيادة", route: "/dashboard", allowedRoles: ['Admin', 'Teacher', 'Student'] },
+      { icon: Users, label: "الطلاب", route: "/students", allowedRoles: ['Admin', 'Teacher'] },
+      { icon: UserCog, label: "المعلمين", route: "/teachers", allowedRoles: ['Admin'] },
+      { icon: CalendarDays, label: "الجدول", route: "/timetable", allowedRoles: ['Admin', 'Teacher', 'Student'] }
+    ]
+  },
+  {
+    title: "الإدارة",
+    items: [
+      { icon: ClipboardCheck, label: "الحضور", route: "/attendance", allowedRoles: ['Admin', 'Teacher'] },
+      { icon: BookOpen, label: "الدرجات والامتحانات", route: "/grades", allowedRoles: ['Admin', 'Teacher', 'Student'] },
+      { icon: DollarSign, label: "المالية", route: "/finance", allowedRoles: ['Admin'] },
+      { icon: Users, label: "الموارد البشرية", route: "/hr", allowedRoles: ['Admin'] } // Using Users for HR for now
+    ]
+  },
+  {
+    title: "التواصل والتقارير",
+    items: [
+      { icon: MessageSquare, label: "المحادثات", route: "/chat", allowedRoles: ['Admin', 'Teacher', 'Student'] },
+      { icon: Bell, label: "الإشعارات", route: "/notifications", allowedRoles: ['Admin', 'Teacher', 'Student'] },
+      { icon: BarChart, label: "التقارير", route: "/reports", allowedRoles: ['Admin', 'Teacher'] },
+      { icon: Bot, label: "مساعد الذكاء الاصطناعي", route: "/ai", allowedRoles: ['Admin', 'Teacher', 'Student'] }
+    ]
+  }
+];
+
 const Sidebar = () => {
   const { user, signOut } = useAuth();
   const userRole = user?.user_metadata?.role;
-
-  const navigationItems = [
-    { to: '/', icon: Home, label: 'لوحة القيادة', allowedRoles: ['admin', 'teacher', 'student', 'parent'] },
-    { to: '/students', icon: Users, label: 'إدارة الطلاب', allowedRoles: ['admin', 'teacher'] },
-    { to: '/teachers', icon: Users, label: 'إدارة المعلمين', allowedRoles: ['admin'] },
-    { to: '/classes', icon: Book, label: 'الحصص والجدول', allowedRoles: ['admin', 'teacher'] },
-    { to: '/attendance', icon: ClipboardCheck, label: 'الحضور', allowedRoles: ['admin', 'teacher'] },
-    { to: '/grades', icon: GraduationCap, label: 'الدرجات والامتحانات', allowedRoles: ['admin', 'teacher'] },
-    { to: '/parent-portal', icon: UsersRound, label: 'بوابة أولياء الأمور', allowedRoles: ['parent'] },
-    // { to: '/settings', icon: Settings, label: 'Settings', allowedRoles: ['admin'] }, // Future feature
-  ];
 
   return (
     <div className="hidden border-r bg-sidebar-background md:block">
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
           <Link to="/" className="flex items-center gap-2 font-semibold text-sidebar-primary">
-            <img src="/UPLOAD_YOUR_LOGO.png" alt="Logo" className="h-6 w-6" />
+            <img src="/school_logo.png" alt="Logo" className="h-6 w-6" />
             <span className="">نظام إدارة المدرسة</span>
           </Link>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 overflow-auto py-2">
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-            {navigationItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                icon={item.icon}
-                label={item.label}
-                currentRole={userRole}
-                allowedRoles={item.allowedRoles}
-              />
+            {navigationGroups.map((group, groupIndex) => (
+              <div key={groupIndex} className="mb-4">
+                <h4 className="mb-2 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {group.title}
+                </h4>
+                {group.items.map((item) => (
+                  <NavLink
+                    key={item.route}
+                    to={item.route}
+                    icon={item.icon}
+                    label={item.label}
+                    currentRole={userRole}
+                    allowedRoles={item.allowedRoles}
+                    onClick={item.route === "/ai" ? () => { /* Handled by Layout SheetTrigger */ } : undefined}
+                  />
+                ))}
+              </div>
             ))}
-            {/* AI Assistant link in sidebar */}
-            <NavLink
-              to="#"
-              icon={Bot}
-              label="مساعد الذكاء الاصطناعي"
-              currentRole={userRole}
-              allowedRoles={['admin', 'teacher', 'student', 'parent']} // All roles can access the AI assistant
-              onClick={() => {
-                // This will be handled by the SheetTrigger in Layout.tsx
-                // For now, it just prevents navigation
-              }}
-            />
           </nav>
         </div>
         <div className="mt-auto p-4 border-t">
@@ -99,16 +127,6 @@ export const MobileSidebar = () => {
   const { user, signOut } = useAuth();
   const userRole = user?.user_metadata?.role;
 
-  const navigationItems = [
-    { to: '/', icon: Home, label: 'لوحة القيادة', allowedRoles: ['admin', 'teacher', 'student', 'parent'] },
-    { to: '/students', icon: Users, label: 'إدارة الطلاب', allowedRoles: ['admin', 'teacher'] },
-    { to: '/teachers', icon: Users, label: 'إدارة المعلمين', allowedRoles: ['admin'] },
-    { to: '/classes', icon: Book, label: 'الحصص والجدول', allowedRoles: ['admin', 'teacher'] },
-    { to: '/attendance', icon: ClipboardCheck, label: 'الحضور', allowedRoles: ['admin', 'teacher'] },
-    { to: '/grades', icon: GraduationCap, label: 'الدرجات والامتحانات', allowedRoles: ['admin', 'teacher'] },
-    { to: '/parent-portal', icon: UsersRound, label: 'بوابة أولياء الأمور', allowedRoles: ['parent'] },
-  ];
-
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -120,30 +138,27 @@ export const MobileSidebar = () => {
       <SheetContent side="left" className="flex flex-col">
         <nav className="grid gap-2 text-lg font-medium">
           <Link to="/" className="flex items-center gap-2 text-lg font-semibold">
-            <img src="/UPLOAD_YOUR_LOGO.png" alt="Logo" className="h-6 w-6" />
+            <img src="/school_logo.png" alt="Logo" className="h-6 w-6" />
             <span className="sr-only">نظام إدارة المدرسة</span>
           </Link>
-          {navigationItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              icon={item.icon}
-              label={item.label}
-              currentRole={userRole}
-              allowedRoles={item.allowedRoles}
-            />
+          {navigationGroups.map((group, groupIndex) => (
+            <div key={groupIndex} className="mb-4">
+              <h4 className="mb-2 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                {group.title}
+              </h4>
+              {group.items.map((item) => (
+                <NavLink
+                  key={item.route}
+                  to={item.route}
+                  icon={item.icon}
+                  label={item.label}
+                  currentRole={userRole}
+                  allowedRoles={item.allowedRoles}
+                  onClick={item.route === "/ai" ? () => { /* Handled by Layout SheetTrigger */ } : undefined}
+                />
+              ))}
+            </div>
           ))}
-          {/* AI Assistant link in mobile sidebar */}
-          <NavLink
-            to="#"
-            icon={Bot}
-            label="مساعد الذكاء الاصطناعي"
-            currentRole={userRole}
-            allowedRoles={['admin', 'teacher', 'student', 'parent']}
-            onClick={() => {
-              // This will be handled by the SheetTrigger in Layout.tsx
-            }}
-          />
         </nav>
         <div className="mt-auto">
           <Button onClick={signOut} className="w-full flex items-center gap-2">
