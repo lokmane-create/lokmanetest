@@ -88,7 +88,7 @@ const Login = () => {
         <CardHeader className="text-center">
           <img src="/school_logo.png" alt="Logo" className="mx-auto h-20 w-20 mb-4" />
           <CardTitle className="text-3xl font-bold text-primary">نظام إدارة المدرسة</CardTitle>
-          <CardDescription className="text-muted-foreground mt-2">حل شامل لإدارة الطلاب والمعلمين والموارد</CardDescription>
+          <CardDescription className="text-muted-foreground mt-2">حل متكامل لإدارة الشؤون التعليمية والإدارية</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <h3 className="text-2xl font-bold text-center mb-6 text-foreground">تسجيل الدخول</h3>

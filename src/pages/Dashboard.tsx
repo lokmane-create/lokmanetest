@@ -3,7 +3,7 @@
 import React from 'react';
 import { useAuth } from '@/integrations/supabase/auth';
 import { Button } from '@/components/ui/button';
-import { Bot, Users, ClipboardCheck, GraduationCap } from 'lucide-react'; // Added Users, ClipboardCheck, GraduationCap
+import { Bot, Users, ClipboardCheck, GraduationCap } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -17,7 +17,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { CartesianGrid, Line, LineChart, Pie, PieChart, ResponsiveContainer, XAxis } from "recharts";
-import { Input } from '@/components/ui/input'; // Added Input
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -25,7 +25,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'; // Added Table components
+} from '@/components/ui/table';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -55,7 +55,7 @@ const Dashboard = () => {
     { id: 6, name: "ميساء عبد", class: "الصف 3", email: "maysa@student.local", attendance: 98, avgGrade: 92 },
     { id: 7, name: "هاجر سمير", class: "الصف 1", email: "hajar@student.local", attendance: 90, avgGrade: 79 },
     { id: 8, name: "يوسف جمال", class: "الصف 2", email: "yousef@student.local", attendance: 88, avgGrade: 73 },
-    { id: 9, name: "لميس أيمن", class: "الصف 1", email: "lamees@student.local", attendance: 95, "avgGrade": 86 },
+    { id: 9, name: "لميس أيمن", class: "الصف 1", email: "lamees@student.local", "attendance": 95, "avgGrade": 86 },
     { id: 10, name: "رامي نبيل", class: "الصف 3", email: "rami@student.local", attendance: 82, avgGrade: 68 }
   ];
 
@@ -63,13 +63,10 @@ const Dashboard = () => {
     <div className="space-y-6">
       <div className="flex flex-col items-center gap-1 text-center pt-6">
         <h3 className="text-2xl font-bold tracking-tight">
-          مرحباً بك في لوحة التحكم، {userFirstName || userEmail}!
+          لوحة القيادة
         </h3>
         <p className="text-sm text-muted-foreground">
-          البريد الإلكتروني: {userEmail} — الدور: <span className="font-semibold capitalize">{userRole}</span>
-        </p>
-        <p className="text-sm text-muted-foreground mt-2">
-          هذا هو مركزك الرئيسي. ستظهر المزيد من الميزات ورؤى الذكاء الاصطناعي هنا قريباً!
+          مخصص لإدارة المدرسة
         </p>
         <Button variant="outline" className="mt-4 flex items-center gap-2" onClick={() => { /* Logic to open AI Assistant sheet */ }}>
           <Bot className="h-4 w-4" />

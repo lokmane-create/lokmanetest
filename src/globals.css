@@ -4,16 +4,16 @@
 
 @layer base {
   :root {
-    --background: 135 25% 97%; /* #F4F9F6 */
+    --background: 135 25% 97%; /* #f3fbf5 */
     --foreground: 222.2 84% 4.9%;
 
-    --card: 0 0% 100%; /* #FFFFFF */
+    --card: 0 0% 100%; /* #ffffff */
     --card-foreground: 222.2 84% 4.9%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 123 46% 33%; /* #2E7D32 */
+    --primary: 135 61% 36%; /* #1f9a44 */
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -22,7 +22,7 @@
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 123 41% 45%; /* #43A047 */
+    --accent: 135 61% 41%; /* #28a745 */
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
@@ -51,7 +51,7 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
 
     /* AI Chat Bubble Colors */
-    --assistant-chat-bubble: 123 46% 33%; /* primary color */
+    --assistant-chat-bubble: 135 61% 36%; /* primary color */
     --assistant-chat-foreground: 210 40% 98%; /* primary-foreground */
     --user-chat-bubble: 217.2 32.6% 17.5%; /* userColor from spec, using secondary for now */
     --user-chat-foreground: 210 40% 98%; /* secondary-foreground */

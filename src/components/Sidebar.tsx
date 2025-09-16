@@ -4,13 +4,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Home, Users, UserCog, CalendarDays, ClipboardCheck, GraduationCap,
-  DollarSign, MessageSquare, Bell, BarChart, Bot, LogOut, BookOpen
+  DollarSign, MessageSquare, Bell, BarChart, Bot, LogOut, BookOpen, Menu
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/integrations/supabase/auth';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu } from 'lucide-react';
 
 interface NavLinkProps {
   to: string;
@@ -51,28 +50,28 @@ const navigationGroups: NavigationGroup[] = [
   {
     title: "الأساسيات",
     items: [
-      { icon: Home, label: "لوحة القيادة", route: "/dashboard", allowedRoles: ['Admin', 'Teacher', 'Student'] },
-      { icon: Users, label: "الطلاب", route: "/students", allowedRoles: ['Admin', 'Teacher'] },
-      { icon: UserCog, label: "المعلمين", route: "/teachers", allowedRoles: ['Admin'] },
-      { icon: CalendarDays, label: "الجدول", route: "/timetable", allowedRoles: ['Admin', 'Teacher', 'Student'] }
+      { icon: Home, label: "لوحة القيادة", route: "/dashboard", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'Accountant', 'HR'] },
+      { icon: Users, label: "إدارة الطلاب", route: "/students", allowedRoles: ['Admin', 'Principal', 'Teacher'] },
+      { icon: UserCog, label: "إدارة المعلمين", route: "/teachers", allowedRoles: ['Admin', 'Principal', 'HR'] },
+      { icon: CalendarDays, label: "الحصص والجدول", route: "/classes", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student'] } // Changed to /classes as it manages timetable
     ]
   },
   {
-    title: "الإدارة",
+    title: "العمليات",
     items: [
-      { icon: ClipboardCheck, label: "الحضور", route: "/attendance", allowedRoles: ['Admin', 'Teacher'] },
-      { icon: BookOpen, label: "الدرجات والامتحانات", route: "/grades", allowedRoles: ['Admin', 'Teacher', 'Student'] },
-      { icon: DollarSign, label: "المالية", route: "/finance", allowedRoles: ['Admin'] },
-      { icon: Users, label: "الموارد البشرية", route: "/hr", allowedRoles: ['Admin'] } // Using Users for HR for now
+      { icon: ClipboardCheck, label: "الحضور", route: "/attendance", allowedRoles: ['Admin', 'Principal', 'Teacher'] },
+      { icon: BookOpen, label: "الدرجات والامتحانات", route: "/grades", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student'] },
+      { icon: DollarSign, label: "المالية", route: "/finance", allowedRoles: ['Admin', 'Principal', 'Accountant'] },
+      { icon: UserCog, label: "الموارد البشرية", route: "/hr", allowedRoles: ['Admin', 'HR'] }
     ]
   },
   {
-    title: "التواصل والتقارير",
+    title: "التواصل والتحليل",
     items: [
-      { icon: MessageSquare, label: "المحادثات", route: "/chat", allowedRoles: ['Admin', 'Teacher', 'Student'] },
-      { icon: Bell, label: "الإشعارات", route: "/notifications", allowedRoles: ['Admin', 'Teacher', 'Student'] },
-      { icon: BarChart, label: "التقارير", route: "/reports", allowedRoles: ['Admin', 'Teacher'] },
-      { icon: Bot, label: "مساعد الذكاء الاصطناعي", route: "/ai", allowedRoles: ['Admin', 'Teacher', 'Student'] }
+      { icon: MessageSquare, label: "المحادثات", route: "/chat", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'HR'] },
+      { icon: Bell, label: "الإشعارات", route: "/notifications", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'HR'] },
+      { icon: BarChart, label: "التقارير والإحصاءات", route: "/reports", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Accountant', 'HR'] },
+      { icon: Bot, label: "مساعد الذكاء الاصطناعي", route: "/ai-assistant", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'Accountant', 'HR'] }
     ]
   }
 ];
@@ -82,12 +81,12 @@ const Sidebar = () => {
   const userRole = user?.user_metadata?.role;
 
   return (
-    <div className="hidden border-r bg-sidebar-background md:block">
+    <div className="hidden border-r bg-sidebar-background md:block" style={{ width: '280px' }}>
       <div className="flex h-full max-h-screen flex-col gap-2">
-        <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+        <div className="flex h-[72px] items-center border-b px-4 lg:px-6">
           <Link to="/" className="flex items-center gap-2 font-semibold text-sidebar-primary">
-            <img src="/school_logo.png" alt="Logo" className="h-6 w-6" />
-            <span className="">نظام إدارة المدرسة</span>
+            <img src="/school_logo.png" alt="Logo" className="h-8 w-8" />
+            <span className="text-lg">نظام إدارة المدرسة</span>
           </Link>
         </div>
         <div className="flex-1 overflow-auto py-2">
@@ -105,7 +104,7 @@ const Sidebar = () => {
                     label={item.label}
                     currentRole={userRole}
                     allowedRoles={item.allowedRoles}
-                    onClick={item.route === "/ai" ? () => { /* Handled by Layout SheetTrigger */ } : undefined}
+                    onClick={item.route === "/ai-assistant" ? () => { /* Handled by Layout SheetTrigger */ } : undefined}
                   />
                 ))}
               </div>
@@ -113,7 +112,12 @@ const Sidebar = () => {
           </nav>
         </div>
         <div className="mt-auto p-4 border-t">
-          <Button onClick={signOut} className="w-full flex items-center gap-2">
+          {/* Placeholder for Switch Account */}
+          <Button variant="outline" className="w-full flex items-center gap-2 mb-2">
+            <UserCog className="h-4 w-4" />
+            تغيير الحساب
+          </Button>
+          <Button onClick={signOut} className="w-full flex items-center gap-2" variant="destructive">
             <LogOut className="h-4 w-4" />
             تسجيل الخروج
           </Button>
@@ -138,7 +142,7 @@ export const MobileSidebar = () => {
       <SheetContent side="left" className="flex flex-col">
         <nav className="grid gap-2 text-lg font-medium">
           <Link to="/" className="flex items-center gap-2 text-lg font-semibold">
-            <img src="/school_logo.png" alt="Logo" className="h-6 w-6" />
+            <img src="/school_logo.png" alt="Logo" className="h-8 w-8" />
             <span className="sr-only">نظام إدارة المدرسة</span>
           </Link>
           {navigationGroups.map((group, groupIndex) => (
@@ -154,14 +158,19 @@ export const MobileSidebar = () => {
                   label={item.label}
                   currentRole={userRole}
                   allowedRoles={item.allowedRoles}
-                  onClick={item.route === "/ai" ? () => { /* Handled by Layout SheetTrigger */ } : undefined}
+                  onClick={item.route === "/ai-assistant" ? () => { /* Handled by Layout SheetTrigger */ } : undefined}
                 />
               ))}
             </div>
           ))}
         </nav>
         <div className="mt-auto">
-          <Button onClick={signOut} className="w-full flex items-center gap-2">
+          {/* Placeholder for Switch Account */}
+          <Button variant="outline" className="w-full flex items-center gap-2 mb-2">
+            <UserCog className="h-4 w-4" />
+            تغيير الحساب
+          </Button>
+          <Button onClick={signOut} className="w-full flex items-center gap-2" variant="destructive">
             <LogOut className="h-4 w-4" />
             تسجيل الخروج
           </Button>
