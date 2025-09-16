@@ -1,7 +1,5 @@
 "use client";
 
-import { Auth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -55,12 +53,12 @@ const Login = () => {
   }
 
   const demoAccounts = [
-    { name: "مدير النظام", email: "admin@school.com", password: "demo123" },
-    { name: "مدير المدرسة", email: "principal@school.com", password: "demo123" },
-    { name: "أحمد محمد", email: "ahmed@school.com", password: "demo123" },
-    { name: "سارة أحمد", email: "sara@school.com", password: "demo123" },
-    { name: "محمد علي", email: "mohamed@school.com", password: "demo123" },
-    { name: "فاطمة حسن", email: "fatima@school.com", password: "demo123" }
+    { name: "مدير النظام", email: "admin@school.com", password: "demo123", role: "Admin" },
+    { name: "مدير المدرسة", email: "principal@school.com", password: "demo123", role: "Principal" },
+    { name: "أحمد محمد", email: "ahmed@student.local", password: "demo123", role: "Student" },
+    { name: "سارة أحمد", email: "sara@student.local", password: "demo123", role: "Student" },
+    { name: "محمد علي", email: "mohamed@student.local", password: "demo123", role: "Student" },
+    { name: "فاطمة حسن", email: "fatima@student.local", password: "demo123", role: "Student" }
   ];
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -90,7 +88,7 @@ const Login = () => {
         <CardHeader className="text-center">
           <img src="/UPLOAD_YOUR_LOGO.png" alt="Logo" className="mx-auto h-20 w-20 mb-4" />
           <CardTitle className="text-3xl font-bold text-primary">نظام إدارة المدرسة</CardTitle>
-          <CardDescription className="text-muted-foreground mt-2">مؤسسة تعليمية لإدارة شؤون الطلاب والمعلمين</CardDescription>
+          <CardDescription className="text-muted-foreground mt-2">لوحة إدارة شاملة للمؤسسات التعليمية</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <h3 className="text-2xl font-bold text-center mb-6 text-foreground">تسجيل الدخول</h3>
