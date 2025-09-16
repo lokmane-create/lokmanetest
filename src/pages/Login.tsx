@@ -57,8 +57,10 @@ const Login = () => {
     { name: "مدير المدرسة", email: "principal@school.com", password: "demo123", role: "Principal" },
     { name: "أحمد محمد", email: "ahmed@student.local", password: "demo123", role: "Student" },
     { name: "سارة أحمد", email: "sara@student.local", password: "demo123", role: "Student" },
-    { name: "محمد علي", email: "mohamed@student.local", password: "demo123", role: "Student" },
-    { name: "فاطمة حسن", email: "fatima@student.local", password: "demo123", role: "Student" }
+    { name: "محمد علي", email: "mohamed@student.local", password: "demo123", role: "Teacher" },
+    { name: "فاطمة حسن", email: "fatima@student.local", password: "demo123", role: "Parent" },
+    { name: "محاسب", email: "accountant@school.com", password: "demo123", role: "Accountant" },
+    { name: "موارد بشرية", email: "hr@school.com", password: "demo123", role: "HR" }
   ];
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {

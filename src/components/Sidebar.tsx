@@ -80,7 +80,11 @@ const navigationGroups: NavigationGroup[] = [
   }
 ];
 
-const Sidebar = () => {
+interface SidebarProps {
+  setIsAiAssistantOpen: (isOpen: boolean) => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ setIsAiAssistantOpen }) => {
   const { user, signOut } = useAuth();
   const userRole = user?.user_metadata?.role;
 
@@ -108,7 +112,7 @@ const Sidebar = () => {
                     label={item.label}
                     currentRole={userRole}
                     allowedRoles={item.allowedRoles}
-                    onClick={item.route === "/ai-assistant" ? () => { /* Handled by Layout SheetTrigger */ } : undefined}
+                    onClick={item.route === "/ai-assistant" ? () => setIsAiAssistantOpen(true) : undefined}
                   />
                 ))}
               </div>
@@ -131,7 +135,11 @@ const Sidebar = () => {
   );
 };
 
-export const MobileSidebar = () => {
+interface MobileSidebarProps {
+  setIsAiAssistantOpen: (isOpen: boolean) => void;
+}
+
+export const MobileSidebar: React.FC<MobileSidebarProps> = ({ setIsAiAssistantOpen }) => {
   const { user, signOut } = useAuth();
   const userRole = user?.user_metadata?.role;
 
@@ -162,7 +170,7 @@ export const MobileSidebar = () => {
                   label={item.label}
                   currentRole={userRole}
                   allowedRoles={item.allowedRoles}
-                  onClick={item.route === "/ai-assistant" ? () => { /* Handled by Layout SheetTrigger */ } : undefined}
+                  onClick={item.route === "/ai-assistant" ? () => setIsAiAssistantOpen(true) : undefined}
                 />
               ))}
             </div>

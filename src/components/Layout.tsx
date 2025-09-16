@@ -35,10 +35,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[280px_1fr]"> {/* Adjusted sidebar width */}
-      <Sidebar />
+      <Sidebar setIsAiAssistantOpen={setIsAiAssistantOpen} />
       <div className="flex flex-col">
         <header className="flex h-[72px] items-center gap-4 border-b bg-background px-4 lg:px-6"> {/* Adjusted header height */}
-          <MobileSidebar />
+          <MobileSidebar setIsAiAssistantOpen={setIsAiAssistantOpen} />
           <div className="w-full flex-1 flex justify-end items-center gap-4">
             {/* User Avatar and Name */}
             <div className="flex items-center gap-2">
