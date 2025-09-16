@@ -65,6 +65,15 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // AI Chat Bubble Colors
+        "assistant-chat-bubble": {
+          DEFAULT: "hsl(var(--assistant-chat-bubble))",
+          foreground: "hsl(var(--assistant-chat-foreground))",
+        },
+        "user-chat-bubble": {
+          DEFAULT: "hsl(var(--user-chat-bubble))",
+          foreground: "hsl(var(--user-chat-foreground))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
