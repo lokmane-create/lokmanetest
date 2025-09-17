@@ -121,11 +121,13 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
   }, [sessionId, strokeColor, strokeWidth, isTeacher]);
 
   useEffect(() => {
+    initializeCanvas();
+
     const currentChannel = channel.current;
 
     currentChannel
       .on('broadcast', { event: 'object_added' }, (payload) => {
-        fabric.util.enlivenObjects([payload.payload], {}, (objects: fabric.Object[]) => { // Re-added empty options object
+        fabric.util.enlivenObjects([payload.payload], (objects: fabric.Object[]) => { // Removed empty options object and type assertion
           objects.forEach(obj => {
             if (fabricCanvasRef.current && !fabricCanvasRef.current.getObjects().some(o => o.id === obj.id)) {
               fabricCanvasRef.current.add(obj);
@@ -149,7 +151,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
         }
       })
       .on('broadcast', { event: 'path_created' }, (payload) => {
-        fabric.util.enlivenObjects([payload.payload], {}, (objects: fabric.Object[]) => { // Re-added empty options object
+        fabric.util.enlivenObjects([payload.payload], (objects: fabric.Object[]) => { // Removed empty options object and type assertion
           objects.forEach(obj => {
             if (fabricCanvasRef.current && !fabricCanvasRef.current.getObjects().some(o => o.id === obj.id)) {
               fabricCanvasRef.current.add(obj);
@@ -267,7 +269,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
     const reader = new FileReader();
     reader.onload = (e) => {
       if (e.target?.result && fabricCanvasRef.current) {
-        fabric.Image.fromURL(e.target.result as string, {}, (img) => { // Added empty options object
+        fabric.Image.fromURL(e.target.result as string, {}, (img) => { // Removed type assertion
           img.set({
             left: 50,
             top: 50,
@@ -363,7 +365,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
         setAiResponse('جاري إنشاء مخطط مبسط لجهاز التنفس على السبورة البيضاء...');
         // Simulate adding a simple diagram (e.g., an image)
         if (fabricCanvasRef.current) {
-          fabric.Image.fromURL('/placeholder.svg', {}, (img) => { // Added empty options object
+          fabric.Image.fromURL('/placeholder.svg', {}, (img) => { // Removed type assertion
             img.set({ left: 100, top: 100, scaleX: 0.5, scaleY: 0.5, selectable: isTeacher, evented: isTeacher, id: uuidv4() }); // Assign unique ID
             fabricCanvasRef.current?.add(img);
             fabricCanvasRef.current?.setActiveObject(img);
