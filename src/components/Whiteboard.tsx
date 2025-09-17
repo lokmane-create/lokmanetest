@@ -62,7 +62,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
           channel.current.send({
             type: 'broadcast',
             event: 'object_added',
-            payload: e.target.toJSON(['id']), // Include custom 'id' in JSON
+            payload: e.target.toJSON(),
           });
         }
       });
@@ -72,7 +72,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
           channel.current.send({
             type: 'broadcast',
             event: 'object_modified',
-            payload: e.target.toJSON(['id']), // Include custom 'id' in JSON
+            payload: e.target.toJSON(),
           });
         }
       });
@@ -95,7 +95,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
           channel.current.send({
             type: 'broadcast',
             event: 'path_created',
-            payload: e.path.toJSON(['id']), // Include custom 'id' in JSON
+            payload: e.path.toJSON(),
           });
         }
       });
@@ -121,13 +121,11 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
   }, [sessionId, strokeColor, strokeWidth, isTeacher]);
 
   useEffect(() => {
-    initializeCanvas();
-
     const currentChannel = channel.current;
 
     currentChannel
       .on('broadcast', { event: 'object_added' }, (payload) => {
-        fabric.util.enlivenObjects([payload.payload], (objects: fabric.Object[]) => {
+        fabric.util.enlivenObjects([payload.payload], {}, (objects: fabric.Object[]) => { // Added empty options object
           objects.forEach(obj => {
             if (fabricCanvasRef.current && !fabricCanvasRef.current.getObjects().some(o => o.id === obj.id)) {
               fabricCanvasRef.current.add(obj);
@@ -151,7 +149,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
         }
       })
       .on('broadcast', { event: 'path_created' }, (payload) => {
-        fabric.util.enlivenObjects([payload.payload], (objects: fabric.Object[]) => {
+        fabric.util.enlivenObjects([payload.payload], {}, (objects: fabric.Object[]) => { // Added empty options object
           objects.forEach(obj => {
             if (fabricCanvasRef.current && !fabricCanvasRef.current.getObjects().some(o => o.id === obj.id)) {
               fabricCanvasRef.current.add(obj);
@@ -218,7 +216,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
         channel.current.send({
           type: 'broadcast',
           event: 'object_added',
-          payload: text.toJSON(['id']),
+          payload: text.toJSON(),
         });
       } else if (['rectangle', 'circle', 'arrow'].includes(tool)) {
         let shape;
@@ -244,7 +242,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
           channel.current.send({
             type: 'broadcast',
             event: 'object_added',
-            payload: shape.toJSON(['id']),
+            payload: shape.toJSON(),
           });
         }
       }
@@ -269,7 +267,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
     const reader = new FileReader();
     reader.onload = (e) => {
       if (e.target?.result && fabricCanvasRef.current) {
-        fabric.Image.fromURL(e.target.result as string, (img) => {
+        fabric.Image.fromURL(e.target.result as string, {}, (img) => { // Added empty options object
           img.set({
             left: 50,
             top: 50,
@@ -284,7 +282,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
           channel.current.send({
             type: 'broadcast',
             event: 'object_added',
-            payload: img.toJSON(['id']),
+            payload: img.toJSON(),
           });
         });
       }
@@ -298,7 +296,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
       return;
     }
 
-    const canvasJson = fabricCanvasRef.current.toJSON(['id']); // Include custom 'id' in canvas JSON
+    const canvasJson = fabricCanvasRef.current.toJSON();
     const { error: dbError } = await supabase
       .from('whiteboard_sessions')
       .upsert(
@@ -365,14 +363,14 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
         setAiResponse('جاري إنشاء مخطط مبسط لجهاز التنفس على السبورة البيضاء...');
         // Simulate adding a simple diagram (e.g., an image)
         if (fabricCanvasRef.current) {
-          fabric.Image.fromURL('/placeholder.svg', (img) => { // Using a generic placeholder
+          fabric.Image.fromURL('/placeholder.svg', {}, (img) => { // Added empty options object
             img.set({ left: 100, top: 100, scaleX: 0.5, scaleY: 0.5, selectable: isTeacher, evented: isTeacher, id: uuidv4() }); // Assign unique ID
             fabricCanvasRef.current?.add(img);
             fabricCanvasRef.current?.setActiveObject(img);
             channel.current.send({
               type: 'broadcast',
               event: 'object_added',
-              payload: img.toJSON(['id']),
+              payload: img.toJSON(),
             });
           });
         }
