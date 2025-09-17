@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { fabric } from 'fabric';
+import * as fabric from 'fabric'; // Corrected import for fabric.js
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/integrations/supabase/auth';
 import { showSuccess, showError } from '@/utils/toast';

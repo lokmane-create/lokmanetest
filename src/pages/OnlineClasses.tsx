@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { PlusCircle, MonitorPlay, Video, CalendarPlus, Download, Whiteboard as WhiteboardIcon } from 'lucide-react';
+import { PlusCircle, MonitorPlay, Video, CalendarPlus, Download, ClipboardPen as WhiteboardIcon } from 'lucide-react'; // Replaced Whiteboard with ClipboardPen
 import { Button } from '@/components/ui/button';
 import {
   Card,
