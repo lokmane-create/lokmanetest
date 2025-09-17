@@ -43,7 +43,7 @@ const Dashboard = () => {
   const averageGrade = (demoData.grades.reduce((sum, grade) => sum + grade.score, 0) / demoData.grades.length).toFixed(1);
   const totalRevenueMonth = demoData.financeTransactions
     .filter(t => t.type === "رسوم دراسية" && new Date(t.date).getMonth() === new Date().getMonth())
-    .reduce((sum, t) => sum + parseFloat(t.amount.replace(' ر.س', '')), 0);
+    .reduce((sum, t) => sum + parseFloat(t.amount.replace(' د.ج', '')), 0);
 
   // Attendance Line Chart Data (simulated for last 5 days)
   const attendanceLineData = [
@@ -123,7 +123,7 @@ const Dashboard = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalRevenueMonth.toLocaleString('ar-SA')} ر.س</div>
+            <div className="text-2xl font-bold">{totalRevenueMonth.toLocaleString('en-US')} د.ج</div>
             <p className="text-xs text-muted-foreground">+10% عن الشهر الماضي</p>
           </CardContent>
         </Card>

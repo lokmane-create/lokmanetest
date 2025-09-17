@@ -25,7 +25,7 @@ const HR = () => {
   const staffMembers = demoData.hrStaff;
   const totalStaff = staffMembers.length;
   const activeContracts = staffMembers.filter(member => member.contract !== 'مؤقت').length; // Simplified active contracts
-  const totalMonthlyPayroll = staffMembers.reduce((sum, member) => sum + parseFloat(member.salary.replace(' ر.س', '')), 0);
+  const totalMonthlyPayroll = staffMembers.reduce((sum, member) => sum + parseFloat(member.salary.replace(' د.ج', '')), 0);
 
   return (
     <div className="space-y-6">
@@ -65,7 +65,7 @@ const HR = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalMonthlyPayroll.toLocaleString('ar-SA')} ر.س</div>
+            <div className="text-2xl font-bold">{totalMonthlyPayroll.toLocaleString('en-US')} د.ج</div>
             <p className="text-xs text-muted-foreground">يشمل جميع الموظفين</p>
           </CardContent>
         </Card>
@@ -101,7 +101,7 @@ const HR = () => {
                     <TableCell>{member.name}</TableCell>
                     <TableCell>{member.role}</TableCell>
                     <TableCell>{member.contract}</TableCell>
-                    <TableCell>{member.salary}</TableCell>
+                    <TableCell>{parseFloat(member.salary.replace(' د.ج', '')).toLocaleString('en-US')} د.ج</TableCell>
                     <TableCell className="text-center">
                       <Button variant="ghost" size="sm">عرض</Button>
                       <Button variant="ghost" size="sm">تحرير</Button>

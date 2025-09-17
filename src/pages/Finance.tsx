@@ -28,15 +28,15 @@ const Finance = () => {
 
   const totalRevenue = allTransactions
     .filter(t => t.type === "رسوم دراسية" && t.status === "مدفوع")
-    .reduce((sum, t) => sum + parseFloat(t.amount.replace(' ر.س', '')), 0);
+    .reduce((sum, t) => sum + parseFloat(t.amount.replace(' د.ج', '')), 0);
 
   const totalExpenses = allTransactions
     .filter(t => t.type !== "رسوم دراسية" && t.status === "مدفوع")
-    .reduce((sum, t) => sum + parseFloat(t.amount.replace(' ر.س', '')), 0);
+    .reduce((sum, t) => sum + parseFloat(t.amount.replace(' د.ج', '')), 0);
 
   const pendingPayments = allTransactions
     .filter(t => t.status === "معلق")
-    .reduce((sum, t) => sum + parseFloat(t.amount.replace(' ر.س', '')), 0);
+    .reduce((sum, t) => sum + parseFloat(t.amount.replace(' د.ج', '')), 0);
   const pendingCount = allTransactions.filter(t => t.status === "معلق").length;
 
   return (
@@ -57,7 +57,7 @@ const Finance = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalRevenue.toLocaleString('ar-SA')} ر.س</div>
+            <div className="text-2xl font-bold">{totalRevenue.toLocaleString('en-US')} د.ج</div>
             <p className="text-xs text-muted-foreground">+10% عن الشهر الماضي</p>
           </CardContent>
         </Card>
@@ -67,7 +67,7 @@ const Finance = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalExpenses.toLocaleString('ar-SA')} ر.س</div>
+            <div className="text-2xl font-bold">{totalExpenses.toLocaleString('en-US')} د.ج</div>
             <p className="text-xs text-muted-foreground">+5% عن الشهر الماضي</p>
           </CardContent>
         </Card>
@@ -77,7 +77,7 @@ const Finance = () => {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pendingPayments.toLocaleString('ar-SA')} ر.س</div>
+            <div className="text-2xl font-bold">{pendingPayments.toLocaleString('en-US')} د.ج</div>
             <p className="text-xs text-muted-foreground">{pendingCount} فواتير معلقة</p>
           </CardContent>
         </Card>
@@ -111,7 +111,7 @@ const Finance = () => {
                 {recentTransactions.map((transaction) => (
                   <TableRow key={transaction.id}>
                     <TableCell>{transaction.type}</TableCell>
-                    <TableCell>{transaction.amount}</TableCell>
+                    <TableCell>{parseFloat(transaction.amount.replace(' د.ج', '')).toLocaleString('en-US')} د.ج</TableCell>
                     <TableCell>
                       {transaction.date && !isNaN(new Date(transaction.date).getTime())
                         ? format(new Date(transaction.date), 'PPP')

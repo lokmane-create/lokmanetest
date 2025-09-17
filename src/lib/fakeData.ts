@@ -67,7 +67,7 @@ export const generateFakeTeachers = (count: number) => {
     const lastName = getRandomItem(arabicLastNames);
     const subjectSpecialty = getRandomItem(subjectsList);
     const teacherId = `T${Math.floor(10000 + Math.random() * 90000)}`;
-    const salary = Math.floor(Math.random() * 5000) + 3000; // 3000-8000 SAR
+    const salary = Math.floor(Math.random() * 5000) + 3000; // 3000-8000 DZD
 
     teachers.push({
       id: uuidv4(),
@@ -76,8 +76,8 @@ export const generateFakeTeachers = (count: number) => {
       teacher_id: teacherId,
       subject_specialty: subjectSpecialty,
       email: `${firstName.toLowerCase()}@school.local`,
-      salary: `${salary} ر.س`,
-      contact: `+9665${Math.floor(10000000 + Math.random() * 90000000)}`,
+      salary: `${salary} د.ج`, // Changed to DZD
+      contact: `+213${Math.floor(100000000 + Math.random() * 900000000)}`, // Algerian phone number prefix
       created_at: new Date().toISOString(),
     });
   }
@@ -204,14 +204,14 @@ export const generateFakeFinanceTransactions = (count: number) => {
   const transactions = [];
   for (let i = 0; i < count; i++) {
     const type = getRandomItem(transactionTypes);
-    const amount = Math.floor(Math.random() * 10000) + 100; // 100-10100 SAR
+    const amount = Math.floor(Math.random() * 10000) + 100; // 100-10100 DZD
     const date = getRandomDate(subMonths(new Date(), 3), new Date());
     const status = Math.random() > 0.8 ? "معلق" : "مدفوع";
 
     transactions.push({
       id: uuidv4(),
       type: type,
-      amount: `${amount} ر.س`,
+      amount: `${amount} د.ج`, // Changed to DZD
       date: date,
       status: status,
       description: `وصف لـ ${type} بتاريخ ${date}`,
@@ -243,14 +243,14 @@ export const generateFakeHRStaff = (teachers: any[], count: number) => {
     const firstName = getRandomItem(arabicFirstNames);
     const lastName = getRandomItem(arabicLastNames);
     const role = getRandomItem(staffRoles.filter(r => r !== "معلم")); // Exclude 'معلم'
-    const salary = Math.floor(Math.random() * 4000) + 2000; // 2000-6000 SAR
+    const salary = Math.floor(Math.random() * 4000) + 2000; // 2000-6000 DZD
     staff.push({
       id: uuidv4(),
       name: `${firstName} ${lastName}`,
       role: role,
       contract: getRandomItem(contractTypes),
-      salary: `${salary} ر.س`,
-      contact: `+9665${Math.floor(10000000 + Math.random() * 90000000)}`,
+      salary: `${salary} د.ج`, // Changed to DZD
+      contact: `+213${Math.floor(100000000 + Math.random() * 900000000)}`, // Algerian phone number prefix
       email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@school.local`,
       created_at: new Date().toISOString(),
     });
