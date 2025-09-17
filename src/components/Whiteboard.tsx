@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import * as fabric from 'fabric'; // Corrected import for fabric.js
+import * as fabric from 'fabric';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/integrations/supabase/auth';
 import { showSuccess, showError } from '@/utils/toast';
@@ -9,6 +9,14 @@ import WhiteboardToolbar from './WhiteboardToolbar';
 import WhiteboardControls from './WhiteboardControls';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { v4 as uuidv4 } from 'uuid'; // Import uuid for unique IDs
+
+// Extend FabricObject to include a custom 'id' property
+declare module 'fabric' {
+  interface FabricObject {
+    id?: string;
+  }
+}
 
 interface WhiteboardProps {
   classId: string;
@@ -48,10 +56,13 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
 
       canvas.on('object:added', (e) => {
         if (e.target) {
+          if (!e.target.id) {
+            e.target.set('id', uuidv4()); // Assign a unique ID if not present
+          }
           channel.current.send({
             type: 'broadcast',
             event: 'object_added',
-            payload: e.target.toJSON(),
+            payload: e.target.toJSON(['id']), // Include custom 'id' in JSON
           });
         }
       });
@@ -61,27 +72,30 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
           channel.current.send({
             type: 'broadcast',
             event: 'object_modified',
-            payload: e.target.toJSON(),
+            payload: e.target.toJSON(['id']), // Include custom 'id' in JSON
           });
         }
       });
 
       canvas.on('object:removed', (e) => {
-        if (e.target) {
+        if (e.target?.id) { // Ensure object has an ID before sending
           channel.current.send({
             type: 'broadcast',
             event: 'object_removed',
-            payload: { id: e.target.id || e.target.name }, // Use id or name for removal
+            payload: { id: e.target.id },
           });
         }
       });
 
       canvas.on('path:created', (e) => {
         if (e.path) {
+          if (!e.path.id) {
+            e.path.set('id', uuidv4()); // Assign a unique ID if not present
+          }
           channel.current.send({
             type: 'broadcast',
             event: 'path_created',
-            payload: e.path.toJSON(),
+            payload: e.path.toJSON(['id']), // Include custom 'id' in JSON
           });
         }
       });
@@ -197,32 +211,31 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
           fontSize: strokeWidth * 2,
           selectable: isTeacher,
           evented: isTeacher,
+          id: uuidv4(), // Assign unique ID
         });
         fabricCanvasRef.current.add(text);
         fabricCanvasRef.current.setActiveObject(text);
         channel.current.send({
           type: 'broadcast',
           event: 'object_added',
-          payload: text.toJSON(),
+          payload: text.toJSON(['id']),
         });
       } else if (['rectangle', 'circle', 'arrow'].includes(tool)) {
-        // Simplified shape drawing: just add a default shape
         let shape;
         if (tool === 'rectangle') {
           shape = new fabric.Rect({
             left: 100, top: 100, width: 100, height: 50, fill: '', stroke: strokeColor, strokeWidth: strokeWidth,
-            selectable: isTeacher, evented: isTeacher,
+            selectable: isTeacher, evented: isTeacher, id: uuidv4(), // Assign unique ID
           });
         } else if (tool === 'circle') {
           shape = new fabric.Circle({
             left: 100, top: 100, radius: 50, fill: '', stroke: strokeColor, strokeWidth: strokeWidth,
-            selectable: isTeacher, evented: isTeacher,
+            selectable: isTeacher, evented: isTeacher, id: uuidv4(), // Assign unique ID
           });
         } else if (tool === 'arrow') {
-          // Fabric.js doesn't have a native arrow, so we'll simulate with a line for now
           shape = new fabric.Line([50, 50, 150, 50], {
             stroke: strokeColor, strokeWidth: strokeWidth,
-            selectable: isTeacher, evented: isTeacher,
+            selectable: isTeacher, evented: isTeacher, id: uuidv4(), // Assign unique ID
           });
         }
         if (shape) {
@@ -231,7 +244,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
           channel.current.send({
             type: 'broadcast',
             event: 'object_added',
-            payload: shape.toJSON(),
+            payload: shape.toJSON(['id']),
           });
         }
       }
@@ -264,13 +277,14 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
             scaleY: 0.5,
             selectable: isTeacher,
             evented: isTeacher,
+            id: uuidv4(), // Assign unique ID
           });
           fabricCanvasRef.current?.add(img);
           fabricCanvasRef.current?.setActiveObject(img);
           channel.current.send({
             type: 'broadcast',
             event: 'object_added',
-            payload: img.toJSON(),
+            payload: img.toJSON(['id']),
           });
         });
       }
@@ -284,7 +298,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
       return;
     }
 
-    const canvasJson = fabricCanvasRef.current.toJSON();
+    const canvasJson = fabricCanvasRef.current.toJSON(['id']); // Include custom 'id' in canvas JSON
     const { error: dbError } = await supabase
       .from('whiteboard_sessions')
       .upsert(
@@ -309,11 +323,9 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
     const dataURL = fabricCanvasRef.current.toDataURL({
       format: 'png',
       quality: 0.8,
+      multiplier: 1, // Required property
     });
 
-    // In a real app, this dataURL would be uploaded to Supabase Storage
-    // and then a record created in the library_items table.
-    // For now, we'll just simulate the success and pass the dataURL.
     showSuccess('تم حفظ السبورة البيضاء بنجاح!');
     onSaveToLibrary(dataURL, `تسجيل سبورة بيضاء - ${new Date().toLocaleString()}`);
   };
@@ -354,13 +366,13 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
         // Simulate adding a simple diagram (e.g., an image)
         if (fabricCanvasRef.current) {
           fabric.Image.fromURL('/placeholder.svg', (img) => { // Using a generic placeholder
-            img.set({ left: 100, top: 100, scaleX: 0.5, scaleY: 0.5, selectable: isTeacher, evented: isTeacher });
+            img.set({ left: 100, top: 100, scaleX: 0.5, scaleY: 0.5, selectable: isTeacher, evented: isTeacher, id: uuidv4() }); // Assign unique ID
             fabricCanvasRef.current?.add(img);
             fabricCanvasRef.current?.setActiveObject(img);
             channel.current.send({
               type: 'broadcast',
               event: 'object_added',
-              payload: img.toJSON(),
+              payload: img.toJSON(['id']),
             });
           });
         }
