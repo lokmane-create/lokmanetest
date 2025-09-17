@@ -125,7 +125,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
 
     currentChannel
       .on('broadcast', { event: 'object_added' }, (payload) => {
-        fabric.util.enlivenObjects([payload.payload], {}, (objects: fabric.Object[]) => { // Added empty options object
+        fabric.util.enlivenObjects([payload.payload], (objects: fabric.Object[]) => { // Removed empty options object
           objects.forEach(obj => {
             if (fabricCanvasRef.current && !fabricCanvasRef.current.getObjects().some(o => o.id === obj.id)) {
               fabricCanvasRef.current.add(obj);
@@ -149,7 +149,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
         }
       })
       .on('broadcast', { event: 'path_created' }, (payload) => {
-        fabric.util.enlivenObjects([payload.payload], {}, (objects: fabric.Object[]) => { // Added empty options object
+        fabric.util.enlivenObjects([payload.payload], (objects: fabric.Object[]) => { // Removed empty options object
           objects.forEach(obj => {
             if (fabricCanvasRef.current && !fabricCanvasRef.current.getObjects().some(o => o.id === obj.id)) {
               fabricCanvasRef.current.add(obj);
