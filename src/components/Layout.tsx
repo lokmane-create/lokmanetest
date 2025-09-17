@@ -8,6 +8,8 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Bot, UserCircle } from 'lucide-react'; // Added UserCircle for avatar
 import AIAssistant from './AIAssistant'; // Import the new AI Assistant component
+import Dashboard from '@/pages/Dashboard'; // Import Dashboard to render it directly
+import { showSuccess } from '@/utils/toast'; // Added missing import
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -46,10 +48,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <span className="font-medium text-sm hidden sm:inline">{userFirstName}</span>
             </div>
             {/* Quick Actions (Placeholder) */}
-            <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+            <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => showSuccess("تم عرض الإشعارات (محاكاة).")}>
               الإشعارات
             </Button>
-            <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+            <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => showSuccess("تم فتح صفحة الإعدادات (محاكاة).")}>
               الإعدادات
             </Button>
             {/* AI Assistant Quick Open */}
@@ -67,7 +69,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          {children}
+          {/* Render children, and if it's the Dashboard, pass the setIsAiAssistantOpen prop */}
+          {React.Children.map(children, child => {
+            if (React.isValidElement(child) && child.type === Dashboard) {
+              return React.cloneElement(child, { setIsAiAssistantOpen } as any);
+            }
+            return child;
+          })}
         </main>
         <footer className="p-4 text-center text-sm text-muted-foreground border-t">
           Made by lokzeg

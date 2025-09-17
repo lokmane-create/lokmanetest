@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/integrations/supabase/auth';
 import { Button } from '@/components/ui/button';
 import { Bot, Users, ClipboardCheck, GraduationCap, DollarSign } from 'lucide-react';
@@ -28,12 +28,16 @@ import {
 } from '@/components/ui/table';
 import { demoData } from '@/lib/fakeData';
 import { format } from 'date-fns';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { showSuccess } from '@/utils/toast'; // Added missing import
 
 const Dashboard = () => {
   const { user } = useAuth();
   const userRole = user?.user_metadata?.role;
-  const userEmail = user?.email;
   const userFirstName = user?.user_metadata?.first_name;
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedGradeFilter, setSelectedGradeFilter] = useState<string>('all');
 
   // Using generated demo data
   const totalStudents = demoData.students.length;
@@ -70,8 +74,16 @@ const Dashboard = () => {
     { name: `D/E - ${gradeDistribution.D_E}`, value: gradeDistribution.D_E, fill: "hsl(var(--destructive))" },
   ];
 
-  // Student List for Dashboard (first 10 students)
-  const studentsTableData = demoData.students.slice(0, 10).map(student => ({
+  // Filtered Student List for Dashboard
+  const filteredStudents = demoData.students.filter(student => {
+    const matchesSearch = searchTerm === '' || student.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          student.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          student.student_id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesGrade = selectedGradeFilter === 'all' || student.grade_level.toString() === selectedGradeFilter;
+    return matchesSearch && matchesGrade;
+  }).slice(0, 10); // Still show first 10 of the filtered list
+
+  const studentsTableData = filteredStudents.map(student => ({
     id: student.id,
     name: `${student.first_name} ${student.last_name}`,
     class: `الصف ${student.grade_level}`,
@@ -79,6 +91,9 @@ const Dashboard = () => {
     attendance: student.attendance,
     avgGrade: student.avgGrade,
   }));
+
+  // Generate grade level options dynamically
+  const gradeLevels = Array.from(new Set(demoData.students.map(s => s.grade_level))).sort((a, b) => a - b);
 
   return (
     <div className="space-y-6">
@@ -89,7 +104,7 @@ const Dashboard = () => {
         <p className="text-sm text-muted-foreground">
           مخصص لإدارة المدرسة
         </p>
-        <Button variant="outline" className="mt-4 flex items-center gap-2" onClick={() => { /* Logic to open AI Assistant sheet */ }}>
+        <Button variant="outline" className="mt-4 flex items-center gap-2" onClick={() => { /* This button will be handled by Layout's setIsAiAssistantOpen */ }}>
           <Bot className="h-4 w-4" />
           تحدث مع مساعد الذكاء الاصطناعي
         </Button>
@@ -197,25 +212,35 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Student List (Placeholder for interactive table) */}
+      {/* Student List (Interactive table) */}
       <Card>
         <CardHeader>
           <CardTitle>قائمة الطلاب (تفاعلية)</CardTitle>
           <CardDescription>ابحث عن اسم الطالب أو الفصل...</CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Placeholder for search, filter, export */}
           <div className="flex flex-col sm:flex-row gap-2 mb-4">
-            <Input placeholder="ابحث عن اسم الطالب أو الفصل..." className="flex-1" />
-            <select className="p-2 border rounded-md">
-              <option>الجميع</option>
-              <option>الصف 1</option>
-              <option>الصف 2</option>
-              <option>الصف 3</option>
-            </select>
-            <Button variant="outline">تصدير CSV</Button>
+            <Input
+              placeholder="ابحث عن اسم الطالب أو الفصل..."
+              className="flex-1"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Select onValueChange={setSelectedGradeFilter} value={selectedGradeFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="اختر الصف" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">جميع الصفوف</SelectItem>
+                {gradeLevels.map(grade => (
+                  <SelectItem key={grade} value={grade.toString()}>
+                    الصف {grade}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" onClick={() => showSuccess("تم تصدير قائمة الطلاب كـ CSV (محاكاة).")}>تصدير CSV</Button>
           </div>
-          {/* Placeholder for table */}
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -229,19 +254,25 @@ const Dashboard = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {studentsTableData.map((student) => (
-                  <TableRow key={student.id}>
-                    <TableCell>{student.name}</TableCell>
-                    <TableCell>{student.class}</TableCell>
-                    <TableCell>{student.email}</TableCell>
-                    <TableCell className="text-center">{student.attendance}%</TableCell>
-                    <TableCell className="text-center">{student.avgGrade}</TableCell>
-                    <TableCell className="text-center">
-                      <Button variant="ghost" size="sm" className="mr-2">عرض</Button>
-                      <Button variant="ghost" size="sm">تحرير</Button>
-                    </TableCell>
+                {studentsTableData.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center">لا يوجد طلاب مطابقون.</TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  studentsTableData.map((student) => (
+                    <TableRow key={student.id}>
+                      <TableCell>{student.name}</TableCell>
+                      <TableCell>{student.class}</TableCell>
+                      <TableCell>{student.email}</TableCell>
+                      <TableCell className="text-center">{student.attendance}%</TableCell>
+                      <TableCell className="text-center">{student.avgGrade}</TableCell>
+                      <TableCell className="text-center">
+                        <Button variant="ghost" size="sm" className="mr-2" onClick={() => showSuccess(`عرض تفاصيل الطالب ${student.name}`)}>عرض</Button>
+                        <Button variant="ghost" size="sm" onClick={() => showSuccess(`تحرير الطالب ${student.name}`)}>تحرير</Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>

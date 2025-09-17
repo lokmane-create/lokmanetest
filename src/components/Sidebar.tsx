@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/integrations/supabase/auth';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { showSuccess } from '@/utils/toast'; // Import showSuccess
 
 interface NavLinkProps {
   to: string;
@@ -54,17 +55,17 @@ const navigationGroups: NavigationGroup[] = [
   {
     title: "الأساسيات",
     items: [
-      { icon: Home, label: "لوحة القيادة", route: "/dashboard", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'Accountant', 'HR'] },
+      { icon: Home, label: "لوحة القيادة", route: "/dashboard", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'Accountant', 'HR', 'Parent'] },
       { icon: Users, label: "إدارة الطلاب", route: "/students", allowedRoles: ['Admin', 'Principal', 'Teacher'] },
       { icon: UserCog, label: "إدارة المعلمين", route: "/teachers", allowedRoles: ['Admin', 'Principal', 'HR'] },
-      { icon: CalendarDays, label: "الحصص والجدول", route: "/timetable", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student'] }
+      { icon: CalendarDays, label: "الحصص والجدول", route: "/timetable", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'Parent'] }
     ]
   },
   {
     title: "الإدارة",
     items: [
-      { icon: ClipboardCheck, label: "الحضور", route: "/attendance", allowedRoles: ['Admin', 'Principal', 'Teacher'] },
-      { icon: BookOpen, label: "الدرجات والامتحانات", route: "/grades", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student'] },
+      { icon: ClipboardCheck, label: "الحضور", route: "/attendance", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Parent'] },
+      { icon: BookOpen, label: "الدرجات والامتحانات", route: "/grades", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'Parent'] },
       { icon: DollarSign, label: "المالية", route: "/finance", allowedRoles: ['Admin', 'Principal', 'Accountant'] },
       { icon: UserCog, label: "الموارد البشرية", route: "/hr", allowedRoles: ['Admin', 'HR'] }
     ]
@@ -72,10 +73,10 @@ const navigationGroups: NavigationGroup[] = [
   {
     title: "التواصل والتحليل",
     items: [
-      { icon: MessageSquare, label: "المحادثات", route: "/chat", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'HR'] },
-      { icon: Bell, label: "الإشعارات", route: "/notifications", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'HR'] },
+      { icon: MessageSquare, label: "المحادثات", route: "/chat", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'HR', 'Parent'] },
+      { icon: Bell, label: "الإشعارات", route: "/notifications", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'HR', 'Parent'] },
       { icon: BarChart, label: "التقارير والإحصاءات", route: "/reports", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Accountant', 'HR'] },
-      { icon: Bot, label: "مساعد الذكاء الاصطناعي", route: "/ai-assistant", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'Accountant', 'HR'] }
+      { icon: Bot, label: "مساعد الذكاء الاصطناعي", route: "/ai-assistant", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'Accountant', 'HR', 'Parent'] }
     ]
   }
 ];
@@ -87,6 +88,11 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ setIsAiAssistantOpen }) => {
   const { user, signOut } = useAuth();
   const userRole = user?.user_metadata?.role;
+
+  const handleSwitchAccount = () => {
+    showSuccess("تم فتح نافذة تبديل الحساب (محاكاة).");
+    // In a real application, this would open a modal or navigate to an account switching page.
+  };
 
   return (
     <div className="hidden border-r bg-sidebar-background md:block" style={{ width: '280px' }}>
@@ -120,8 +126,7 @@ const Sidebar: React.FC<SidebarProps> = ({ setIsAiAssistantOpen }) => {
           </nav>
         </div>
         <div className="mt-auto p-4 border-t">
-          {/* Placeholder for Switch Account */}
-          <Button variant="outline" className="w-full flex items-center gap-2 mb-2">
+          <Button variant="outline" className="w-full flex items-center gap-2 mb-2" onClick={handleSwitchAccount}>
             <UserCog className="h-4 w-4" />
             تغيير الحساب
           </Button>
@@ -142,6 +147,11 @@ interface MobileSidebarProps {
 export const MobileSidebar: React.FC<MobileSidebarProps> = ({ setIsAiAssistantOpen }) => {
   const { user, signOut } = useAuth();
   const userRole = user?.user_metadata?.role;
+
+  const handleSwitchAccount = () => {
+    showSuccess("تم فتح نافذة تبديل الحساب (محاكاة).");
+    // In a real application, this would open a modal or navigate to an account switching page.
+  };
 
   return (
     <Sheet>
@@ -177,8 +187,7 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({ setIsAiAssistantOp
           ))}
         </nav>
         <div className="mt-auto">
-          {/* Placeholder for Switch Account */}
-          <Button variant="outline" className="w-full flex items-center gap-2 mb-2">
+          <Button variant="outline" className="w-full flex items-center gap-2 mb-2" onClick={handleSwitchAccount}>
             <UserCog className="h-4 w-4" />
             تغيير الحساب
           </Button>

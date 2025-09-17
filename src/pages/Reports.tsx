@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/table';
 import { demoData } from '@/lib/fakeData'; // Import demo data
 import { format } from 'date-fns';
+import { showSuccess } from '@/utils/toast';
 
 const Reports = () => {
   // Using generated demo data
@@ -68,10 +69,10 @@ const Reports = () => {
                           : 'N/A'}
                       </TableCell>
                       <TableCell className="text-center">
-                        <Button variant="outline" size="sm" className="mr-2">
+                        <Button variant="outline" size="sm" className="mr-2" onClick={() => showSuccess(`عرض تقرير: ${report.name} (محاكاة)`)}>
                           <FileText className="h-4 w-4 mr-2" /> عرض
                         </Button>
-                        <Button variant="default" size="sm">
+                        <Button variant="default" size="sm" onClick={() => showSuccess(`تصدير تقرير: ${report.name} (PDF/Excel) (محاكاة)`)}>
                           <Download className="h-4 w-4 mr-2" /> تصدير (PDF/Excel)
                         </Button>
                       </TableCell>
@@ -92,7 +93,7 @@ const Reports = () => {
           <p className="text-sm text-muted-foreground">
             يمكنك طلب تقارير مخصصة من مساعد الذكاء الاصطناعي.
           </p>
-          <Button variant="outline" className="mt-4">
+          <Button variant="outline" className="mt-4" onClick={() => showSuccess("تم إرسال طلب تقرير مخصص إلى مساعد الذكاء الاصطناعي (محاكاة).")}>
             <BarChart className="h-4 w-4 mr-2" /> طلب تقرير من الذكاء الاصطناعي
           </Button>
         </CardContent>
