@@ -1,12 +1,19 @@
 import { v4 as uuidv4 } from 'uuid';
-import { format, addDays, subDays, subMonths, subYears, subMinutes } from 'date-fns'; // Added subMinutes
+import { format, addDays, subDays, subMonths, subYears, subMinutes } from 'date-fns';
 
-const arabicFirstNames = [
-  "أحمد", "محمد", "علي", "يوسف", "خالد", "فاطمة", "سارة", "مريم", "نورة", "ليلى"
+const algerianMaleFirstNames = [
+  "لقمان", "ياسين", "سفيان", "رشيد", "وليد", "مهدي", "كريم", "عبد القادر", "سمير", "أمين", "فارس", "رياض", "حمزة", "بلال", "شمس الدين"
 ];
-const arabicLastNames = [
-  "الغامدي", "الزهراني", "الشهري", "الحربي", "المطيري", "القحطاني", "العتيبي", "الدوسري", "السبيعي", "العنزي"
+const algerianFemaleFirstNames = [
+  "أمل", "سميرة", "أمينة", "نادية", "إيناس", "ليلى", "هدى", "مريم", "كهينة", "سارة", "فاطمة", "خديجة", "زينب", "شيماء", "ريم"
 ];
+const algerianLastNames = [
+  "بوزيد", "بن صالح", "شريت", "حداد", "خليفة", "مزهود", "تومي", "زياني", "منصوري", "شارف", "عمارة", "بن عمار", "قادري", "بوشارب", "بن يوسف"
+];
+const algerianCities = [
+  "الجزائر", "وهران", "قسنطينة", "تيزي وزو", "عنابة", "البليدة", "بجاية", "سطيف", "غرداية", "تلمسان", "بومرداس", "جيجل", "سكيكدة", "باتنة", "بسكرة"
+];
+
 const subjectsList = [
   "الرياضيات", "العلوم", "اللغة العربية", "اللغة الإنجليزية", "التاريخ", "الجغرافيا", "التربية الإسلامية", "الفنون", "التربية البدنية", "الحاسوب"
 ];
@@ -32,13 +39,15 @@ const getRandomDate = (start: Date, end: Date) => {
 export const generateFakeStudents = (count: number) => {
   const students = [];
   for (let i = 0; i < count; i++) {
-    const firstName = getRandomItem(arabicFirstNames);
-    const lastName = getRandomItem(arabicLastNames);
-    const dob = getRandomDate(subYears(new Date(), 18), subYears(new Date(), 6));
+    const isMale = Math.random() > 0.5;
+    const firstName = isMale ? getRandomItem(algerianMaleFirstNames) : getRandomItem(algerianFemaleFirstNames);
+    const lastName = getRandomItem(algerianLastNames);
+    const dob = getRandomDate(subYears(new Date(), 18), subYears(new Date(), 6)); // Age 6-18
     const gradeLevel = Math.floor(Math.random() * 12) + 1; // 1 to 12
     const attendance = Math.floor(Math.random() * 20) + 80; // 80-100%
     const avgGrade = Math.floor(Math.random() * 40) + 60; // 60-100
     const studentId = `S${Math.floor(10000 + Math.random() * 90000)}`;
+    const city = getRandomItem(algerianCities);
 
     students.push({
       id: uuidv4(),
@@ -47,12 +56,13 @@ export const generateFakeStudents = (count: number) => {
       student_id: studentId,
       date_of_birth: dob,
       grade_level: gradeLevel,
-      email: `${firstName.toLowerCase()}@student.local`,
+      email: `${firstName.toLowerCase()}.${lastName.toLowerCase().replace(/\s/g, '')}@student.local`,
       attendance: attendance,
       avgGrade: avgGrade,
-      parent_name: `${getRandomItem(arabicFirstNames)} ${getRandomItem(arabicLastNames)}`,
-      parent_contact: `+9665${Math.floor(10000000 + Math.random() * 90000000)}`,
+      parent_name: `${getRandomItem(algerianMaleFirstNames)} ${getRandomItem(algerianLastNames)}`,
+      parent_contact: `+213${Math.floor(500000000 + Math.random() * 500000000)}`, // Algerian phone number prefix
       gpa: (Math.random() * (4.0 - 2.0) + 2.0).toFixed(2),
+      city: city,
       created_at: new Date().toISOString(),
     });
   }
@@ -63,8 +73,9 @@ export const generateFakeStudents = (count: number) => {
 export const generateFakeTeachers = (count: number) => {
   const teachers = [];
   for (let i = 0; i < count; i++) {
-    const firstName = getRandomItem(arabicFirstNames);
-    const lastName = getRandomItem(arabicLastNames);
+    const isMale = Math.random() > 0.5;
+    const firstName = isMale ? getRandomItem(algerianMaleFirstNames) : getRandomItem(algerianFemaleFirstNames);
+    const lastName = getRandomItem(algerianLastNames);
     const subjectSpecialty = getRandomItem(subjectsList);
     const teacherId = `T${Math.floor(10000 + Math.random() * 90000)}`;
     const salary = Math.floor(Math.random() * 5000) + 3000; // 3000-8000 DZD
@@ -75,9 +86,9 @@ export const generateFakeTeachers = (count: number) => {
       last_name: lastName,
       teacher_id: teacherId,
       subject_specialty: subjectSpecialty,
-      email: `${firstName.toLowerCase()}@school.local`,
-      salary: `${salary} د.ج`, // Changed to DZD
-      contact: `+213${Math.floor(100000000 + Math.random() * 900000000)}`, // Algerian phone number prefix
+      email: `${firstName.toLowerCase()}.${lastName.toLowerCase().replace(/\s/g, '')}@school.local`,
+      salary: `${salary} د.ج`,
+      contact: `+213${Math.floor(500000000 + Math.random() * 500000000)}`, // Algerian phone number prefix
       created_at: new Date().toISOString(),
     });
   }
@@ -211,7 +222,7 @@ export const generateFakeFinanceTransactions = (count: number) => {
     transactions.push({
       id: uuidv4(),
       type: type,
-      amount: `${amount} د.ج`, // Changed to DZD
+      amount: `${amount} د.ج`,
       date: date,
       status: status,
       description: `وصف لـ ${type} بتاريخ ${date}`,
@@ -240,8 +251,9 @@ export const generateFakeHRStaff = (teachers: any[], count: number) => {
 
   // Add additional staff members
   for (let i = 0; i < count - teachers.length; i++) {
-    const firstName = getRandomItem(arabicFirstNames);
-    const lastName = getRandomItem(arabicLastNames);
+    const isMale = Math.random() > 0.5;
+    const firstName = isMale ? getRandomItem(algerianMaleFirstNames) : getRandomItem(algerianFemaleFirstNames);
+    const lastName = getRandomItem(algerianLastNames);
     const role = getRandomItem(staffRoles.filter(r => r !== "معلم")); // Exclude 'معلم'
     const salary = Math.floor(Math.random() * 4000) + 2000; // 2000-6000 DZD
     staff.push({
@@ -249,9 +261,9 @@ export const generateFakeHRStaff = (teachers: any[], count: number) => {
       name: `${firstName} ${lastName}`,
       role: role,
       contract: getRandomItem(contractTypes),
-      salary: `${salary} د.ج`, // Changed to DZD
-      contact: `+213${Math.floor(100000000 + Math.random() * 900000000)}`, // Algerian phone number prefix
-      email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@school.local`,
+      salary: `${salary} د.ج`,
+      contact: `+213${Math.floor(500000000 + Math.random() * 500000000)}`, // Algerian phone number prefix
+      email: `${firstName.toLowerCase()}.${lastName.toLowerCase().replace(/\s/g, '')}@school.local`,
       created_at: new Date().toISOString(),
     });
   }
@@ -347,16 +359,16 @@ export const generateFakeReports = (count: number) => {
 
 // Combined data generation for easy access
 export const generateAllFakeData = () => {
-  const students = generateFakeStudents(200);
-  const teachers = generateFakeTeachers(20);
+  const students = generateFakeStudents(50); // Adjusted to 50 students
+  const teachers = generateFakeTeachers(15); // Adjusted to 15 teachers
   const subjects = generateFakeSubjects(subjectsList.length);
-  const classes = generateFakeClasses(subjects, teachers, 30);
-  const schedules = generateFakeSchedules(classes, 50);
-  const attendanceRecords = generateFakeAttendance(students, classes, teachers, 150);
-  const grades = generateFakeGrades(students, classes, teachers, 300);
+  const classes = generateFakeClasses(subjects, teachers, 20); // Adjusted to 20 classes
+  const schedules = generateFakeSchedules(classes, 40);
+  const attendanceRecords = generateFakeAttendance(students, classes, teachers, 100);
+  const grades = generateFakeGrades(students, classes, teachers, 200);
   const financeTransactions = generateFakeFinanceTransactions(50);
-  const hrStaff = generateFakeHRStaff(teachers, 25); // 25 total staff including teachers
-  const chatMessages = generateFakeChatMessages(teachers, 50); // Teachers are part of chat users
+  const hrStaff = generateFakeHRStaff(teachers, 20); // 20 total staff including teachers
+  const chatMessages = generateFakeChatMessages(teachers, 50);
   const notifications = generateFakeNotifications(10);
   const reports = generateFakeReports(5);
 
