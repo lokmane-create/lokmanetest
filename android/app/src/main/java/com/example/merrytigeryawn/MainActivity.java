@@ -1,4 +1,4 @@
-package com.example.merrytigeryawn;
+package com.alibana.school;
 
 import com.getcapacitor.BridgeActivity;
 

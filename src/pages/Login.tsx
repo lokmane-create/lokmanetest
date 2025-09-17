@@ -88,8 +88,8 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4 font-cairo text-right">
       <Card className="w-full max-w-md bg-card text-foreground shadow-lg rounded-lg">
         <CardHeader className="text-center">
-          <img src="/school_logo.png" alt="Logo" className="mx-auto h-20 w-20 mb-4" />
-          <CardTitle className="text-3xl font-bold text-primary">نظام إدارة المدرسة</CardTitle>
+          <img src="/logo_saned.png" alt="الإبانة Logo" className="mx-auto h-20 w-20 mb-4" />
+          <CardTitle className="text-3xl font-bold text-primary">الإبانة</CardTitle>
           <CardDescription className="text-muted-foreground mt-2">حل متكامل لإدارة الشؤون التعليمية والإدارية</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

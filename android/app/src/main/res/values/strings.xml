@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">merry-tiger-yawn</string>
-    <string name="title_activity_main">merry-tiger-yawn</string>
-    <string name="package_name">com.example.merrytigeryawn</string>
-    <string name="custom_url_scheme">com.example.merrytigeryawn</string>
+    <string name="app_name">الإبانة</string>
+    <string name="title_activity_main">الإبانة</string>
+    <string name="package_name">com.alibana.school</string>
+    <string name="custom_url_scheme">com.alibana.school</string>
 </resources>

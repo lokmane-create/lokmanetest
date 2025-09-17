@@ -93,8 +93,8 @@ const Sidebar: React.FC<SidebarProps> = ({ setIsAiAssistantOpen }) => {
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-[72px] items-center border-b px-4 lg:px-6">
           <Link to="/" className="flex items-center gap-2 font-semibold text-sidebar-primary">
-            <img src="/school_logo.png" alt="Logo" className="h-8 w-8" />
-            <span className="text-lg">نظام إدارة المدرسة</span>
+            <img src="/logo_saned.png" alt="الإبانة Logo" className="h-8 w-8" />
+            <span className="text-lg">الإبانة</span>
           </Link>
         </div>
         <div className="flex-1 overflow-auto py-2">
@@ -154,8 +154,8 @@ export const MobileSidebar: React.FC<MobileSidebarProps> = ({ setIsAiAssistantOp
       <SheetContent side="left" className="flex flex-col">
         <nav className="grid gap-2 text-lg font-medium">
           <Link to="/" className="flex items-center gap-2 text-lg font-semibold">
-            <img src="/school_logo.png" alt="Logo" className="h-8 w-8" />
-            <span className="sr-only">نظام إدارة المدرسة</span>
+            <img src="/logo_saned.png" alt="الإبانة Logo" className="h-8 w-8" />
+            <span className="sr-only">الإبانة</span>
           </Link>
           {navigationGroups.map((group, groupIndex) => (
             <div key={groupIndex} className="mb-4">

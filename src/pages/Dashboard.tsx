@@ -84,7 +84,7 @@ const Dashboard = () => {
     <div className="space-y-6">
       <div className="flex flex-col items-center gap-1 text-center pt-6">
         <h3 className="text-2xl font-bold tracking-tight">
-          لوحة القيادة
+          لوحة قيادة الإبانة
         </h3>
         <p className="text-sm text-muted-foreground">
           مخصص لإدارة المدرسة
