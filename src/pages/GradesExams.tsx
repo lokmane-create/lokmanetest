@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { PlusCircle, BarChart, Award, TrendingDown } from 'lucide-react';
+import { PlusCircle, BarChart, Award, TrendingDown, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import {
@@ -37,7 +37,7 @@ interface Grade {
   max_score: number;
   graded_by: string;
   created_at: string;
-  students: { first_name: string; last_name: string; student_id: string } | null;
+  students: { id: string; first_name: string; last_name: string; student_id: string } | null;
   classes: { name: string } | null;
   profiles: { first_name: string; last_name: string } | null;
 }
@@ -103,8 +103,28 @@ const GradesExams = () => {
 
   // Calculate averages and top/bottom students from filtered grades
   const averageScore = filteredGrades && filteredGrades.length > 0 ? (filteredGrades.reduce((sum, g) => sum + g.score, 0) / filteredGrades.length).toFixed(1) : 'N/A';
-  const topStudents = filteredGrades ? [...filteredGrades].sort((a, b) => b.score - a.score).slice(0, 5) : [];
-  const bottomStudents = filteredGrades ? [...filteredGrades].sort((a, b) => a.score - b.score).slice(0, 5) : [];
+
+  // Calculate GPA for each student
+  const studentGPAs: { [key: string]: { totalScore: number, totalMaxScore: number, count: number, name: string } } = {};
+  demoData.grades.forEach(grade => {
+    if (!studentGPAs[grade.student_id]) {
+      const student = demoData.students.find(s => s.id === grade.student_id);
+      studentGPAs[grade.student_id] = { totalScore: 0, totalMaxScore: 0, count: 0, name: student ? `${student.first_name} ${student.last_name}` : 'N/A' };
+    }
+    studentGPAs[grade.student_id].totalScore += grade.score;
+    studentGPAs[grade.student_id].totalMaxScore += grade.max_score;
+    studentGPAs[grade.student_id].count++;
+  });
+
+  const studentsWithGPA = Object.entries(studentGPAs).map(([studentId, data]) => ({
+    id: studentId,
+    name: data.name,
+    gpa: data.totalMaxScore > 0 ? ((data.totalScore / data.totalMaxScore) * 100).toFixed(2) : '0.00',
+  }));
+
+  const topStudents = [...studentsWithGPA].sort((a, b) => parseFloat(b.gpa) - parseFloat(a.gpa)).slice(0, 5);
+  const bottomStudents = [...studentsWithGPA].sort((a, b) => parseFloat(a.gpa) - parseFloat(b.gpa)).slice(0, 5);
+
 
   if (isLoading || isLoadingStudents || isLoadingClasses) {
     return (
@@ -171,8 +191,8 @@ const GradesExams = () => {
           </CardHeader>
           <CardContent>
             <ul className="text-sm text-muted-foreground">
-              {topStudents.length === 0 ? <li>لا يوجد بيانات</li> : topStudents.map((grade, index) => (
-                <li key={index}>{grade.students?.first_name} {grade.students?.last_name} ({grade.score})</li>
+              {topStudents.length === 0 ? <li>لا يوجد بيانات</li> : topStudents.map((student, index) => (
+                <li key={index}>{student.name} ({student.gpa})</li>
               ))}
             </ul>
           </CardContent>
@@ -184,8 +204,8 @@ const GradesExams = () => {
           </CardHeader>
           <CardContent>
             <ul className="text-sm text-muted-foreground">
-              {bottomStudents.length === 0 ? <li>لا يوجد بيانات</li> : bottomStudents.map((grade, index) => (
-                <li key={index}>{grade.students?.first_name} {grade.students?.last_name} ({grade.score})</li>
+              {bottomStudents.length === 0 ? <li>لا يوجد بيانات</li> : bottomStudents.map((student, index) => (
+                <li key={index}>{student.name} ({student.gpa})</li>
               ))}
             </ul>
           </CardContent>
@@ -237,6 +257,9 @@ const GradesExams = () => {
             ))}
           </SelectContent>
         </Select>
+        <Button variant="outline" onClick={() => showSuccess("تم تصدير تقرير الدرجات كـ PDF (محاكاة).")}>
+          <Download className="mr-2 h-4 w-4" /> تصدير تقرير
+        </Button>
       </div>
 
       <div className="rounded-md border">

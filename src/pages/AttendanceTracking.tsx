@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { PlusCircle, CalendarDays, CheckCircle, XCircle } from 'lucide-react';
+import { PlusCircle, CalendarDays, CheckCircle, XCircle, TrendingUp, TrendingDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,15 +15,17 @@ import {
 } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import AttendanceForm from '@/components/AttendanceForm';
-import { format, isSameDay, isSameWeek, isSameMonth, parseISO } from 'date-fns';
+import { format, isSameDay, isSameWeek, isSameMonth, parseISO, subDays } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { demoData } from '@/lib/fakeData'; // Import demo data
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { showSuccess } from '@/utils/toast';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
 interface AttendanceRecord {
   id: string;
@@ -98,6 +100,34 @@ const AttendanceTracking = () => {
   const presentMonth = currentMonthRecords?.filter(rec => rec.status === 'Present').length || 0;
   const totalRecordsMonth = currentMonthRecords?.length || 0;
   const attendancePercentageMonth = totalRecordsMonth > 0 ? ((presentMonth / totalRecordsMonth) * 100).toFixed(1) : 'N/A';
+
+  // Absentee Reports and Alerts
+  const recentAbsentees = attendanceRecords
+    ?.filter(rec => rec.status === 'Absent' && !isSameDay(parseISO(rec.date), new Date())) // Exclude today's absentees from "recent"
+    .sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime())
+    .slice(0, 5);
+
+  const highAbsenceStudents = demoData.students.map(student => {
+    const studentAbsences = attendanceRecords?.filter(rec => rec.student_id === student.id && rec.status === 'Absent').length || 0;
+    const totalStudentRecords = attendanceRecords?.filter(rec => rec.student_id === student.id).length || 1;
+    const absenceRate = (studentAbsences / totalStudentRecords) * 100;
+    return { ...student, absenceRate };
+  }).filter(student => student.absenceRate > 15) // Threshold for high absence
+    .sort((a, b) => b.absenceRate - a.absenceRate)
+    .slice(0, 3);
+
+  // Attendance Trend Chart Data (last 7 days)
+  const attendanceTrendData = Array.from({ length: 7 }).map((_, i) => {
+    const date = subDays(new Date(), 6 - i);
+    const recordsForDay = attendanceRecords?.filter(rec => isSameDay(parseISO(rec.date), date)) || [];
+    const presentCount = recordsForDay.filter(rec => rec.status === 'Present').length;
+    const totalCount = recordsForDay.length;
+    const percentage = totalCount > 0 ? (presentCount / totalCount) * 100 : 0;
+    return {
+      date: format(date, 'EEE'), // Mon, Tue, etc.
+      percentage: parseFloat(percentage.toFixed(1)),
+    };
+  });
 
 
   if (isLoading || isLoadingClasses) {
@@ -185,6 +215,43 @@ const AttendanceTracking = () => {
         </Card>
       </div>
 
+      {/* Attendance Trend Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>اتجاهات الحضور (آخر 7 أيام)</CardTitle>
+          <CardDescription>متوسط نسبة الحضور اليومية.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer config={{
+            percentage: {
+              label: "Percentage",
+              color: "hsl(var(--primary))",
+            },
+          }} className="aspect-video h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={attendanceTrendData}>
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  className="text-xs"
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `${value}%`}
+                  className="text-xs"
+                />
+                <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel formatter={(value) => `${value}%`} />} />
+                <Bar dataKey="percentage" fill="var(--color-percentage)" radius={4} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-2 mb-4">
         <Select onValueChange={setSelectedClassFilter} value={selectedClassFilter}>
@@ -267,6 +334,44 @@ const AttendanceTracking = () => {
           </TableBody>
         </Table>
       </div>
+
+      {/* Absentee Reports and Alerts */}
+      <Card>
+        <CardHeader>
+          <CardTitle>تقارير الغياب والتنبيهات</CardTitle>
+          <CardDescription>الطلاب الذين لديهم غيابات متكررة أو حديثة.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <h4 className="font-semibold mb-2">الغيابات الأخيرة (غير اليوم)</h4>
+            <ul className="list-disc list-inside text-muted-foreground space-y-1">
+              {recentAbsentees?.length === 0 ? (
+                <li>لا توجد غيابات حديثة.</li>
+              ) : (
+                recentAbsentees?.map(absentee => (
+                  <li key={absentee.id}>
+                    {absentee.students?.first_name} {absentee.students?.last_name} ({absentee.classes?.name}) - {format(parseISO(absentee.date), 'PPP')}
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold mb-2">طلاب ذوو غياب مرتفع (أكثر من 15%)</h4>
+            <ul className="list-disc list-inside text-destructive space-y-1">
+              {highAbsenceStudents?.length === 0 ? (
+                <li>لا يوجد طلاب بغياب مرتفع حالياً.</li>
+              ) : (
+                highAbsenceStudents?.map(student => (
+                  <li key={student.id}>
+                    {student.first_name} {student.last_name} (الصف {student.grade_level}) - {student.absenceRate.toFixed(1)}% غياب
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

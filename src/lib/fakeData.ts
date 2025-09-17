@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { format, addDays, subDays, subMonths, subYears, subMinutes } from 'date-fns';
+import { format, addDays, subDays, subMonths, subYears, subMinutes } from 'date-fns'; // Added subMinutes
 
 const algerianMaleFirstNames = [
   "لقمان", "ياسين", "سفيان", "رشيد", "وليد", "مهدي", "كريم", "عبد القادر", "سمير", "أمين", "فارس", "رياض", "حمزة", "بلال", "شمس الدين"
@@ -61,6 +61,7 @@ export const generateFakeStudents = (count: number) => {
       avgGrade: avgGrade,
       parent_name: `${getRandomItem(algerianMaleFirstNames)} ${getRandomItem(algerianLastNames)}`,
       parent_contact: `+213${Math.floor(500000000 + Math.random() * 500000000)}`, // Algerian phone number prefix
+      emergency_contact: `+213${Math.floor(500000000 + Math.random() * 500000000)}`,
       gpa: (Math.random() * (4.0 - 2.0) + 2.0).toFixed(2),
       city: city,
       created_at: new Date().toISOString(),
@@ -244,7 +245,7 @@ export const generateFakeHRStaff = (teachers: any[], count: number) => {
       contract: getRandomItem(contractTypes),
       salary: teacher.salary,
       contact: teacher.contact,
-      email: teacher.email,
+      email: `${teacher.first_name.toLowerCase()}.${teacher.last_name.toLowerCase().replace(/\s/g, '')}@school.local`,
       created_at: teacher.created_at,
     });
   });
@@ -357,6 +358,91 @@ export const generateFakeReports = (count: number) => {
   return reports;
 };
 
+// Generate Online Classes
+export const generateFakeOnlineClasses = (classes: any[], teachers: any[], count: number) => {
+  const onlineClasses = [];
+  const meetingPlatforms = ["Jitsi Meet", "Google Meet", "Zoom"];
+  for (let i = 0; i < count; i++) {
+    const cls = getRandomItem(classes);
+    const teacher = getRandomItem(teachers);
+    const startTime = addDays(new Date(), Math.floor(Math.random() * 7));
+    startTime.setHours(Math.floor(Math.random() * 4) + 9, Math.floor(Math.random() * 60), 0); // 9 AM to 1 PM
+    const endTime = addMinutes(startTime, 60 + Math.floor(Math.random() * 60)); // 60-120 minutes
+    const platform = getRandomItem(meetingPlatforms);
+
+    onlineClasses.push({
+      id: uuidv4(),
+      class_id: cls.id,
+      teacher_id: teacher.id,
+      title: `حصة مباشرة: ${cls.name}`,
+      description: `فصل دراسي مباشر عبر الإنترنت لمادة ${cls.name}.`,
+      start_time: startTime.toISOString(),
+      end_time: endTime.toISOString(),
+      platform: platform,
+      meeting_link: `https://meet.jit.si/AlibanaSchool_${cls.name.replace(/\s/g, '')}_${format(startTime, 'ddMMyyHHmm')}`,
+      recorded: Math.random() > 0.5,
+      recording_link: Math.random() > 0.5 ? `https://example.com/recordings/${uuidv4()}.mp4` : null,
+      created_at: new Date().toISOString(),
+      classes: { name: cls.name },
+      teachers: { first_name: teacher.first_name, last_name: teacher.last_name },
+    });
+  }
+  return onlineClasses;
+};
+
+// Generate Library Items
+export const generateFakeLibraryItems = (subjects: any[], count: number) => {
+  const libraryItems = [];
+  const itemTypes = ["PDF", "E-Book", "Video", "Notes", "Homework"];
+  const fileExtensions = {
+    "PDF": ".pdf",
+    "E-Book": ".epub",
+    "Video": ".mp4",
+    "Notes": ".docx",
+    "Homework": ".pdf",
+  };
+
+  for (let i = 0; i < count; i++) {
+    const subject = getRandomItem(subjects);
+    const type = getRandomItem(itemTypes);
+    const title = `مادة ${subject.name} - ${type} ${i + 1}`;
+    const gradeLevel = Math.floor(Math.random() * 12) + 1;
+    const uploadDate = getRandomDate(subYears(new Date(), 1), new Date());
+
+    libraryItems.push({
+      id: uuidv4(),
+      title: title,
+      description: `وصف لـ ${title}.`,
+      type: type,
+      subject_id: subject.id,
+      grade_level: gradeLevel,
+      file_url: `https://example.com/library/${title.replace(/\s/g, '_')}${fileExtensions[type as keyof typeof fileExtensions]}`,
+      uploaded_by: getRandomItem(algerianMaleFirstNames), // Simplified for demo
+      upload_date: uploadDate,
+      created_at: new Date().toISOString(),
+      subjects: { name: subject.name },
+    });
+  }
+  return libraryItems;
+};
+
+// Generate Leaderboard (simplified)
+export const generateFakeLeaderboard = (students: any[], count: number) => {
+  const leaderboard = [...students]
+    .sort((a, b) => b.avgGrade - a.avgGrade) // Sort by average grade
+    .slice(0, count)
+    .map((student, index) => ({
+      id: student.id,
+      student_name: `${student.first_name} ${student.last_name}`,
+      rank: index + 1,
+      score: student.avgGrade,
+      grade_level: student.grade_level,
+      badges: Math.random() > 0.7 ? ["المتفوق", "المواظب"] : ["المجتهد"], // Simplified badges
+    }));
+  return leaderboard;
+};
+
+
 // Combined data generation for easy access
 export const generateAllFakeData = () => {
   const students = generateFakeStudents(50); // Adjusted to 50 students
@@ -371,6 +457,9 @@ export const generateAllFakeData = () => {
   const chatMessages = generateFakeChatMessages(teachers, 50);
   const notifications = generateFakeNotifications(10);
   const reports = generateFakeReports(5);
+  const onlineClasses = generateFakeOnlineClasses(classes, teachers, 10);
+  const libraryItems = generateFakeLibraryItems(subjects, 30);
+  const leaderboard = generateFakeLeaderboard(students, 10);
 
   return {
     students,
@@ -385,6 +474,9 @@ export const generateAllFakeData = () => {
     chatMessages,
     notifications,
     reports,
+    onlineClasses,
+    libraryItems,
+    leaderboard,
   };
 };
 

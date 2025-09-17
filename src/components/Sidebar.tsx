@@ -4,7 +4,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Home, Users, UserCog, CalendarDays, ClipboardCheck, GraduationCap,
-  DollarSign, MessageSquare, Bell, BarChart, Bot, LogOut, BookOpen, Menu
+  DollarSign, MessageSquare, Bell, BarChart, Bot, LogOut, BookOpen, Menu,
+  MonitorPlay, Library as LibraryIcon, Trophy
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/integrations/supabase/auth';
@@ -77,6 +78,14 @@ const navigationGroups: NavigationGroup[] = [
       { icon: Bell, label: "الإشعارات", route: "/notifications", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'HR', 'Parent'] },
       { icon: BarChart, label: "التقارير والإحصاءات", route: "/reports", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Accountant', 'HR'] },
       { icon: Bot, label: "مساعد الذكاء الاصطناعي", route: "/ai-assistant", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student', 'Accountant', 'HR', 'Parent'] }
+    ]
+  },
+  {
+    title: "الموارد الإضافية",
+    items: [
+      { icon: MonitorPlay, label: "الفصول والاجتماعات", route: "/online-classes", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student'] },
+      { icon: LibraryIcon, label: "المكتبة والموارد", route: "/library", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student'] },
+      { icon: Trophy, label: "الألعاب والمكافآت", route: "/gamification", allowedRoles: ['Admin', 'Principal', 'Teacher', 'Student'] }
     ]
   }
 ];

@@ -34,6 +34,7 @@ interface Student {
   avgGrade: number; // Added for demo data
   parent_name: string; // Added for demo data
   parent_contact: string; // Added for demo data
+  emergency_contact: string; // Added for demo data
   gpa: string; // Added for demo data
 }
 
@@ -155,13 +156,14 @@ const StudentManagement = () => {
               <TableHead>المعدل التراكمي</TableHead>
               <TableHead>اسم ولي الأمر</TableHead>
               <TableHead>اتصال ولي الأمر</TableHead>
+              <TableHead>اتصال الطوارئ</TableHead>
               <TableHead className="text-center">إجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredStudents?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center">لا يوجد طلاب مطابقون.</TableCell>
+                <TableCell colSpan={10} className="text-center">لا يوجد طلاب مطابقون.</TableCell>
               </TableRow>
             ) : (
               filteredStudents?.map((student) => (
@@ -178,6 +180,7 @@ const StudentManagement = () => {
                   <TableCell>{student.gpa}</TableCell>
                   <TableCell>{student.parent_name}</TableCell>
                   <TableCell>{student.parent_contact}</TableCell>
+                  <TableCell>{student.emergency_contact}</TableCell>
                   <TableCell className="text-center">
                     <Button variant="ghost" size="sm" className="mr-2" onClick={() => showSuccess(`عرض تفاصيل الطالب ${student.first_name} ${student.last_name}`)}>عرض</Button>
                     <Button variant="ghost" size="sm" onClick={() => showSuccess(`تحرير الطالب ${student.first_name} ${student.last_name}`)}>تحرير</Button>

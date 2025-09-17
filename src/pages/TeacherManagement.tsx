@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { PlusCircle, MessageSquare, Download } from 'lucide-react';
+import { PlusCircle, MessageSquare, Download, CalendarDays } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,6 +21,7 @@ import { demoData } from '@/lib/fakeData'; // Import demo data
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { showSuccess, showError } from '@/utils/toast';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 interface Teacher {
   id: string;
@@ -39,6 +40,15 @@ interface Subject {
   name: string;
 }
 
+interface Schedule {
+  id: string;
+  class_id: string;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  classes: { name: string } | null;
+}
+
 // Mock fetch function using demoData
 const fetchTeachers = async (): Promise<Teacher[]> => {
   // Simulate API call delay
@@ -51,10 +61,26 @@ const fetchSubjects = async (): Promise<Subject[]> => {
   return demoData.subjects.map(s => ({ id: s.id, name: s.name }));
 };
 
+const fetchSchedules = async (): Promise<Schedule[]> => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  return demoData.schedules as Schedule[];
+};
+
+const daysOfWeekMap: { [key: number]: string } = {
+  0: "الأحد",
+  1: "الإثنين",
+  2: "الثلاثاء",
+  3: "الأربعاء",
+  4: "الخميس",
+  5: "الجمعة",
+  6: "السبت",
+};
+
 const TeacherManagement = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubjectFilter, setSelectedSubjectFilter] = useState<string>('all');
+  const [selectedTeacherForSchedule, setSelectedTeacherForSchedule] = useState<string | null>(null);
 
   const { data: teachers, isLoading, error, refetch } = useQuery<Teacher[], Error>({
     queryKey: ['teachers'],
@@ -64,6 +90,11 @@ const TeacherManagement = () => {
   const { data: subjects, isLoading: isLoadingSubjects, error: subjectsError } = useQuery<Subject[], Error>({
     queryKey: ['allSubjects'],
     queryFn: fetchSubjects,
+  });
+
+  const { data: schedules, isLoading: isLoadingSchedules, error: schedulesError } = useQuery<Schedule[], Error>({
+    queryKey: ['schedules'],
+    queryFn: fetchSchedules,
   });
 
   const handleTeacherAdded = () => {
@@ -80,7 +111,18 @@ const TeacherManagement = () => {
     return matchesSearch && matchesSubject;
   });
 
-  if (isLoading || isLoadingSubjects) {
+  const getTeacherSchedule = (teacherId: string) => {
+    const teacherClasses = demoData.classes.filter(cls => cls.teacher_id === teacherId);
+    const teacherSchedule = schedules?.filter(schedule =>
+      teacherClasses.some(cls => cls.id === schedule.class_id)
+    ).map(schedule => ({
+      ...schedule,
+      classes: { name: teacherClasses.find(cls => cls.id === schedule.class_id)?.name || 'N/A' }
+    }));
+    return teacherSchedule || [];
+  };
+
+  if (isLoading || isLoadingSubjects || isLoadingSchedules) {
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
@@ -105,6 +147,10 @@ const TeacherManagement = () => {
 
   if (subjectsError) {
     return <div className="text-red-500">Error loading subjects: {subjectsError.message}</div>;
+  }
+
+  if (schedulesError) {
+    return <div className="text-red-500">Error loading schedules: {schedulesError.message}</div>;
   }
 
   return (
@@ -182,8 +228,50 @@ const TeacherManagement = () => {
                   <TableCell>{teacher.contact}</TableCell>
                   <TableCell className="text-center">
                     <Button variant="ghost" size="sm" className="mr-2" onClick={() => showSuccess(`عرض تفاصيل المعلم ${teacher.first_name} ${teacher.last_name}`)}>عرض</Button>
-                    <Button variant="ghost" size="sm" onClick={() => showSuccess(`تحرير المعلم ${teacher.first_name} ${teacher.last_name}`)}>تحرير</Button>
+                    <Button variant="ghost" size="sm" className="mr-2" onClick={() => showSuccess(`تحرير المعلم ${teacher.first_name} ${teacher.last_name}`)}>تحرير</Button>
                     <Button variant="ghost" size="sm" className="text-blue-500" onClick={() => showSuccess(`إرسال رسالة إلى ${teacher.first_name} ${teacher.last_name}`)}><MessageSquare className="h-4 w-4" /></Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="ghost" size="sm" className="ml-2" onClick={() => setSelectedTeacherForSchedule(teacher.id)}>
+                          <CalendarDays className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[600px]">
+                        <DialogHeader>
+                          <DialogTitle>جدول {teacher.first_name} {teacher.last_name}</DialogTitle>
+                        </DialogHeader>
+                        <CardContent>
+                          <div className="rounded-md border">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>اليوم</TableHead>
+                                  <TableHead>الحصة</TableHead>
+                                  <TableHead>وقت البدء</TableHead>
+                                  <TableHead>وقت الانتهاء</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {selectedTeacherForSchedule && getTeacherSchedule(selectedTeacherForSchedule).length > 0 ? (
+                                  getTeacherSchedule(selectedTeacherForSchedule).map(schedule => (
+                                    <TableRow key={schedule.id}>
+                                      <TableCell>{daysOfWeekMap[schedule.day_of_week]}</TableCell>
+                                      <TableCell>{schedule.classes?.name || 'N/A'}</TableCell>
+                                      <TableCell>{schedule.start_time}</TableCell>
+                                      <TableCell>{schedule.end_time}</TableCell>
+                                    </TableRow>
+                                  ))
+                                ) : (
+                                  <TableRow>
+                                    <TableCell colSpan={4} className="text-center">لا يوجد جدول لهذا المعلم.</TableCell>
+                                  </TableRow>
+                                )}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </CardContent>
+                      </DialogContent>
+                    </Dialog>
                   </TableCell>
                 </TableRow>
               ))

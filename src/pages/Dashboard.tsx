@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/integrations/supabase/auth';
 import { Button } from '@/components/ui/button';
-import { Bot, Users, ClipboardCheck, GraduationCap, DollarSign } from 'lucide-react';
+import { Bot, Users, ClipboardCheck, GraduationCap, DollarSign, Bell, CalendarDays } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -27,9 +27,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { demoData } from '@/lib/fakeData';
-import { format } from 'date-fns';
+import { format, isToday, isFuture, parseISO } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { showSuccess } from '@/utils/toast'; // Added missing import
+import { showSuccess } from '@/utils/toast';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -42,12 +42,13 @@ const Dashboard = () => {
   // Using generated demo data
   const totalStudents = demoData.students.length;
   const totalTeachers = demoData.teachers.length;
-  const totalStaff = demoData.hrStaff.length;
-  const todayAttendanceCount = demoData.attendanceRecords.filter(rec => format(new Date(rec.date), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') && rec.status === 'Present').length;
-  const averageGrade = (demoData.grades.reduce((sum, grade) => sum + grade.score, 0) / demoData.grades.length).toFixed(1);
-  const totalRevenueMonth = demoData.financeTransactions
-    .filter(t => t.type === "رسوم دراسية" && new Date(t.date).getMonth() === new Date().getMonth())
+  const totalStaff = demoData.hrStaff.length; // Including teachers and other staff
+  const feesCollectedMonth = demoData.financeTransactions
+    .filter(t => t.type === "رسوم دراسية" && t.status === "مدفوع" && new Date(t.date).getMonth() === new Date().getMonth())
     .reduce((sum, t) => sum + parseFloat(t.amount.replace(' د.ج', '')), 0);
+  const todayAttendanceCount = demoData.attendanceRecords.filter(rec => format(parseISO(rec.date), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') && rec.status === 'Present').length;
+  const upcomingExams = demoData.grades.filter(grade => isFuture(parseISO(grade.created_at))).slice(0, 3); // Simplified: using created_at as a proxy for exam date
+  const recentNotifications = demoData.notifications.slice(0, 5).sort((a, b) => parseISO(b.created_at).getTime() - parseISO(a.created_at).getTime());
 
   // Attendance Line Chart Data (simulated for last 5 days)
   const attendanceLineData = [
@@ -104,14 +105,14 @@ const Dashboard = () => {
         <p className="text-sm text-muted-foreground">
           مخصص لإدارة المدرسة
         </p>
-        <Button variant="outline" className="mt-4 flex items-center gap-2" onClick={() => { /* This button will be handled by Layout's setIsAiAssistantOpen */ }}>
+        <Button variant="outline" className="mt-4 flex items-center gap-2" onClick={() => showSuccess("تم فتح مساعد الذكاء الاصطناعي (محاكاة).")}>
           <Bot className="h-4 w-4" />
           تحدث مع مساعد الذكاء الاصطناعي
         </Button>
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">إجمالي الطلاب</CardTitle>
@@ -120,6 +121,26 @@ const Dashboard = () => {
           <CardContent>
             <div className="text-2xl font-bold">{totalStudents}</div>
             <p className="text-xs text-muted-foreground">+4% عن الشهر الماضي</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">إجمالي المعلمين</CardTitle>
+            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalTeachers}</div>
+            <p className="text-xs text-muted-foreground">+1 معلم جديد</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">الرسوم المحصلة (الشهر)</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{feesCollectedMonth.toLocaleString('en-US')} د.ج</div>
+            <p className="text-xs text-muted-foreground">+10% عن الشهر الماضي</p>
           </CardContent>
         </Card>
         <Card>
@@ -134,12 +155,12 @@ const Dashboard = () => {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إيرادات هذا الشهر</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">الاختبارات القادمة</CardTitle>
+            <CalendarDays className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalRevenueMonth.toLocaleString('en-US')} د.ج</div>
-            <p className="text-xs text-muted-foreground">+10% عن الشهر الماضي</p>
+            <div className="text-2xl font-bold">{upcomingExams.length}</div>
+            <p className="text-xs text-muted-foreground">في الأسبوعين القادمين</p>
           </CardContent>
         </Card>
       </div>
@@ -279,16 +300,25 @@ const Dashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Quick Activities and Summary */}
+      {/* Notifications Panel */}
       <Card>
-        <CardHeader>
-          <CardTitle>نشاطات سريعة وملخص</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>الإشعارات الأخيرة</CardTitle>
+          <Button variant="outline" size="sm" onClick={() => showSuccess("تم عرض جميع الإشعارات (محاكاة).")}>
+            <Bell className="mr-2 h-4 w-4" /> عرض الكل
+          </Button>
         </CardHeader>
         <CardContent>
           <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-            <li>آخر تسجيل: {format(new Date(), 'HH:mm')} مضت بواسطة مدير النظام</li>
-            <li>تنبيه: غياب 3 طلاب هذا الأسبوع</li>
-            <li>تذكير: إدخال درجات الفصل قبل 10 مايو</li>
+            {recentNotifications.length === 0 ? (
+              <li>لا توجد إشعارات حالياً.</li>
+            ) : (
+              recentNotifications.map((notification) => (
+                <li key={notification.id}>
+                  <strong>{notification.title}:</strong> {notification.content} (بتاريخ {format(parseISO(notification.date), 'PPP')})
+                </li>
+              ))
+            )}
           </ul>
         </CardContent>
       </Card>
