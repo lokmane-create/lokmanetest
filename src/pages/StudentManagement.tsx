@@ -163,7 +163,7 @@ const StudentManagement = () => {
           <TableBody>
             {filteredStudents?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} className="text-center">لا يوجد طلاب مطابقون.</TableCell>
+                <TableCell colSpan={9} className="text-center">لا يوجد طلاب مطابقون.</TableCell>
               </TableRow>
             ) : (
               filteredStudents?.map((student) => (

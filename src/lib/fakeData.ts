@@ -245,7 +245,7 @@ export const generateFakeHRStaff = (teachers: any[], count: number) => {
       contract: getRandomItem(contractTypes),
       salary: teacher.salary,
       contact: teacher.contact,
-      email: `${teacher.first_name.toLowerCase()}.${teacher.last_name.toLowerCase().replace(/\s/g, '')}@school.local`,
+      email: teacher.email,
       created_at: teacher.created_at,
     });
   });

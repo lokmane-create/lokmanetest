@@ -30,6 +30,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/integrations/supabase/auth';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"; // Added form components
+import { format, parseISO } from 'date-fns';
 
 interface LibraryItem {
   id: string;
@@ -99,99 +101,103 @@ const UploadResourceForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-      <FormField
-        control={form.control}
-        name="title"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>العنوان</FormLabel>
-            <Input placeholder="عنوان المورد" {...field} />
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="description"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>الوصف (اختياري)</FormLabel>
-            <Textarea placeholder="وصف موجز للمورد" {...field} />
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="type"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>نوع المورد</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <SelectTrigger>
-                <SelectValue placeholder="اختر نوع المورد" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="PDF">ملف PDF</SelectItem>
-                <SelectItem value="E-Book">كتاب إلكتروني</SelectItem>
-                <SelectItem value="Video">فيديو</SelectItem>
-                <SelectItem value="Notes">ملاحظات</SelectItem>
-                <SelectItem value="Homework">واجب منزلي</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="subject_id"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>المادة</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <SelectTrigger>
-                <SelectValue placeholder="اختر مادة" />
-              </SelectTrigger>
-              <SelectContent>
-                {subjects?.map(subject => (
-                  <SelectItem key={subject.id} value={subject.id}>{subject.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="grade_level"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>المستوى الدراسي</FormLabel>
-            <Input type="number" placeholder="1" {...field} />
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="file"
-        render={({ field: { value, onChange, ...fieldProps } }) => (
-          <FormItem>
-            <FormLabel>الملف</FormLabel>
-            <Input
-              {...fieldProps}
-              type="file"
-              onChange={(event) => onChange(event.target.files && event.target.files[0])}
-            />
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <Button type="submit" className="w-full">تحميل المورد</Button>
-    </form>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>العنوان</FormLabel>
+              <Input placeholder="عنوان المورد" {...field} />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>الوصف (اختياري)</FormLabel>
+              <Textarea placeholder="وصف موجز للمورد" {...field} />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>نوع المورد</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر نوع المورد" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PDF">ملف PDF</SelectItem>
+                  <SelectItem value="E-Book">كتاب إلكتروني</SelectItem>
+                  <SelectItem value="Video">فيديو</SelectItem>
+                  <SelectItem value="Notes">ملاحظات</SelectItem>
+                  <SelectItem value="Homework">واجب منزلي</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="subject_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>المادة</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر مادة" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {subjects?.map(subject => (
+                    <SelectItem key={subject.id} value={subject.id}>{subject.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="grade_level"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>المستوى الدراسي</FormLabel>
+              <Input type="number" placeholder="1" {...field} />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="file"
+          render={({ field: { value, onChange, ...fieldProps } }) => (
+            <FormItem>
+              <FormLabel>الملف</FormLabel>
+              <Input
+                {...fieldProps}
+                type="file"
+                onChange={(event) => onChange(event.target.files && event.target.files[0])}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-full">تحميل المورد</Button>
+      </form>
+    </Form>
   );
 };
 
