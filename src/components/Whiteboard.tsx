@@ -140,6 +140,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
           obj.set(payload.payload);
           fabricCanvasRef.current?.renderAll();
         }
+        // No need to send broadcast here, as it's already handled by canvas.on('object:modified')
       })
       .on('broadcast', { event: 'object_removed' }, (payload) => {
         const obj = fabricCanvasRef.current?.getObjects().find(o => o.id === payload.payload.id);
@@ -187,7 +188,7 @@ const Whiteboard: React.FC<WhiteboardProps> = ({ classId, sessionId, isTeacher, 
 
   useEffect(() => {
     if (fabricCanvasRef.current) {
-      fabricCanvasRef.current.isDrawingMode = activeTool === 'pen' || activeTool === 'highlighter' || activeTool === 'eraser';
+      fabricCanvasRef.current.isDrawingMode = ['pen', 'highlighter', 'eraser'].includes(activeTool);
       fabricCanvasRef.current.freeDrawingBrush.color = activeTool === 'eraser' ? '#f8f8f8' : strokeColor;
       fabricCanvasRef.current.freeDrawingBrush.width = activeTool === 'eraser' ? strokeWidth * 2 : strokeWidth;
       fabricCanvasRef.current.selection = isTeacher; // Only teacher can select/move
