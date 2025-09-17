@@ -22,7 +22,7 @@ import { demoData } from '@/lib/fakeData'; // Import demo data
 import { format, subWeeks, subMonths, isSameWeek, isSameMonth, parseISO } from 'date-fns';
 import { showSuccess } from '@/utils/toast';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { Bar, Line, Pie, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { Bar, Line, Pie, ResponsiveContainer, XAxis, YAxis, CartesianGrid, LineChart, BarChart } from 'recharts'; // Added LineChart and BarChart
 
 const Reports = () => {
   // Using generated demo data

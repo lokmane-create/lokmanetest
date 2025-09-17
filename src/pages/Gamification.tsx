@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Trophy, Award, Star, Crown } from 'lucide-react';
+import { Trophy, Award, Star, Crown, ClipboardCheck, BookOpen } from 'lucide-react'; // Added ClipboardCheck and BookOpen
 import { Button } from '@/components/ui/button';
 import {
   Card,
