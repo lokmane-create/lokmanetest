@@ -114,35 +114,38 @@ const AIAssistant: React.FC = () => {
   const rolePolicies = {
     Admin: {
       allowedData: ["all_students", "all_teachers", "financials", "hr_records", "system_logs", "all_grades", "all_attendance", "all_classes", "all_subjects", "all_schedules", "online_classes", "library_items", "gamification"],
-      allowedActions: ["generate_reports", "export_all", "configure_system", "issue_notifications", "create_accounts", "manage_users", "schedule_online_classes", "upload_library_items"],
+      allowedActions: ["generate_reports", "export_all", "configure_system", "issue_notifications", "create_accounts", "manage_users", "schedule_online_classes", "upload_library_items", "ai_draw_whiteboard"],
       examples: [
         { input: "انشئ تقرير حضور شهري مفصل وارفقه كـ PDF", assistant: "سأنشئ تقرير حضور شهري مفصل لجميع الصفوف وإرفاقه كـ PDF. هل تريد تضمين تفاصيل الطلاب (الأسماء، أرقام الهوية) أم ملخصًا تجميعيًا فقط؟" },
         { input: "أعطني ملخص مالي لهذا الشهر", assistant: "إليك ملخص الإيرادات مقابل المصروفات للشهر الجاري: 45,000 د.ج - المصروفات: 27,200 د.ج. صافي: 17,800 د.ج. هل ترغب في تفصيل الفواتير؟" },
         { input: "كم عدد الطلاب في المدرسة؟", assistant: `يوجد حالياً ${demoData.students.length} طالب في المدرسة.` },
         { input: "جدول حصة مباشرة", assistant: "بالتأكيد، ما هي تفاصيل الحصة المباشرة التي تود جدولتها؟ (المادة، المعلم، الوقت، المنصة)" },
         { input: "أرني تقريري الأسبوعي", assistant: generateWeeklyReport('Admin') },
+        { input: "ارسم لي مخطط لجهاز التنفس على السبورة", assistant: "بالتأكيد، سأقوم بإنشاء مخطط مبسط لجهاز التنفس على السبورة البيضاء." },
       ],
       tone: "formal, strategic and data-driven"
     },
     Principal: {
       allowedData: ["all_students", "all_teachers", "aggregate_financials", "all_grades", "all_attendance", "all_classes", "all_subjects", "all_schedules", "online_classes", "library_items", "gamification"],
-      allowedActions: ["generate_reports", "view_dashboards", "issue_school_notifications", "schedule_online_classes"],
+      allowedActions: ["generate_reports", "view_dashboards", "issue_school_notifications", "schedule_online_classes", "ai_draw_whiteboard"],
       examples: [
         { input: "أعطني إحصائيات الأداء العام لكل الصفوف.", assistant: "جاري تجميع إحصائيات الأداء العام لجميع الصفوف. سأقدم لك ملخصاً شاملاً." },
         { input: "من هم أفضل المعلمين في نسبة الحضور؟", assistant: "جاري تحليل بيانات حضور المعلمين لتحديد الأفضل. سأعرض لك النتائج قريباً." },
         { input: "كم عدد المعلمين لدينا؟", assistant: `لدينا ${demoData.teachers.length} معلم في المدرسة.` },
         { input: "أرني تقريري الأسبوعي", assistant: generateWeeklyReport('Principal') },
+        { input: "ارسم لي مخطط لجهاز التنفس على السبورة", assistant: "بالتأكيد، سأقوم بإنشاء مخطط مبسط لجهاز التنفس على السبورة البيضاء." },
       ],
       tone: "formal, high-level and advisory"
     },
     Teacher: {
       allowedData: ["class_students", "class_attendance", "class_grades", "own_schedule", "online_classes_for_my_classes", "library_items_for_my_subjects"],
-      allowedActions: ["enter_grades", "record_attendance", "message_students", "request_reports_for_class", "schedule_online_classes", "upload_library_items"],
+      allowedActions: ["enter_grades", "record_attendance", "message_students", "request_reports_for_class", "schedule_online_classes", "upload_library_items", "ai_draw_whiteboard"],
       examples: [
         { input: "من تغيب اليوم من صفي؟", assistant: "اليوم غاب عن صفك 3 طلاب: رامي نبيل، مريم سالم، وسلمان حسين. هل تريد إرسال تذكير عبر الرسائل لهم أو لولي أمرهم؟" },
         { input: "اعطني تقرير درجات صف 1", assistant: "متوسط صف 1 في آخر اختبار هو 78.6. عدد الطلاب تحت 60: 4. هل تريد تفصيل لكل طالب أو تلخيص نقاط الضعف حسب المادة؟" },
         { input: "ما هو جدولي لهذا الأسبوع؟", assistant: "جدولك لهذا الأسبوع يتضمن حصص الرياضيات للصفوف 7 و 8 يومي الإثنين والأربعاء، وحصة العلوم للصف 9 يوم الثلاثاء." },
         { input: "أرني تقريري الأسبوعي", assistant: generateWeeklyReport('Teacher') },
+        { input: "ارسم لي مخطط لجهاز التنفس على السبورة", assistant: "بالتأكيد، سأقوم بإنشاء مخطط مبسط لجهاز التنفس على السبورة البيضاء." },
       ],
       tone: "helpful, concise and operational"
     },
@@ -154,6 +157,7 @@ const AIAssistant: React.FC = () => {
         { input: "كم نسبة حضوري هذا الفصل؟", assistant: "نسبة حضورك هذا الفصل هي 92%. مبروك — أنت ضمن الفئة الأعلى حضوراً." },
         { input: "أرني جدولي الدراسي.", assistant: "جدولك الدراسي ليوم الإثنين هو: حصة الرياضيات الساعة 9:00 صباحاً، وحصة اللغة العربية الساعة 11:00 صباحاً." },
         { input: "أرني تقريري الأسبوعي", assistant: generateWeeklyReport('Student') },
+        { input: "اشرح لي هذا المفهوم", assistant: "بالتأكيد، يرجى تحديد المفهوم الذي تود شرحه." },
       ],
       tone: "simple, encouraging and supportive"
     },
@@ -186,6 +190,7 @@ const AIAssistant: React.FC = () => {
         { input: "ما درجات ابني/ابنتي؟", assistant: "يرجى تحديد اسم طفلك. بعد ذلك، سأعرض لك درجاته في آخر الاختبارات." },
         { input: "كم نسبة حضور ابني/ابنتي؟", assistant: "يرجى تحديد اسم طفلك. سأقوم بالتحقق من سجلات حضوره." },
         { input: "أرني تقريري الأسبوعي", assistant: generateWeeklyReport('Parent') },
+        { input: "اشرح لي هذا المفهوم", assistant: "بالتأكيد، يرجى تحديد المفهوم الذي تود شرحه." },
       ],
       tone: "supportive and informative"
     }
@@ -240,6 +245,12 @@ const AIAssistant: React.FC = () => {
     }
     if (lowerCaseMessage.includes("ألعاب") || lowerCaseMessage.includes("مكافآت") || lowerCaseMessage.includes("لوحة المتصدرين") && roleConfig.allowedData.includes("gamification")) {
       return "هل تود عرض لوحة المتصدرين، أو شارات الإنجاز، أو نقاطك؟";
+    }
+    if (lowerCaseMessage.includes("ارسم لي") && roleConfig.allowedActions.includes("ai_draw_whiteboard")) {
+      return "بالتأكيد، ما الذي تود أن أرسمه على السبورة البيضاء؟";
+    }
+    if (lowerCaseMessage.includes("اشرح لي هذا") && (roleConfig.allowedData.includes("own_grades") || roleConfig.allowedData.includes("library_items_for_my_grades") || roleConfig.allowedData.includes("child_grades") || roleConfig.allowedData.includes("library_items_for_child_grades"))) {
+      return "بالتأكيد، يرجى تحديد المفهوم الذي تود شرحه.";
     }
     if (lowerCaseMessage.includes("مساعدة") || lowerCaseMessage.includes("كيف أستخدمك")) {
       return `أهلاً بك! أنا مساعدك الذكي في نظام إدارة المدرسة. بصفتك ${userRole}، يمكنك أن تسألني عن: ${roleConfig.examples.map(e => `"${e.input}"`).join(', ')}.`;

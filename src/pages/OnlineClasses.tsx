@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { PlusCircle, MonitorPlay, Video, CalendarPlus, Download } from 'lucide-react';
+import { PlusCircle, MonitorPlay, Video, CalendarPlus, Download, Whiteboard as WhiteboardIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -31,7 +31,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"; // Added form components
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import Whiteboard from '@/components/Whiteboard'; // Import Whiteboard component
+import { v4 as uuidv4 } from 'uuid'; // For generating session IDs
 
 interface OnlineClass {
   id: string;
@@ -256,6 +258,7 @@ const OnlineClasses = () => {
   const { user } = useAuth();
   const userRole = user?.user_metadata?.role;
   const [isScheduleFormOpen, setIsScheduleFormOpen] = useState(false);
+  const [activeWhiteboardSession, setActiveWhiteboardSession] = useState<{ classId: string; sessionId: string; isTeacher: boolean } | null>(null);
 
   const { data: onlineClasses, isLoading, error, refetch } = useQuery<OnlineClass[], Error>({
     queryKey: ['onlineClasses'],
@@ -265,6 +268,13 @@ const OnlineClasses = () => {
   const handleClassScheduled = () => {
     setIsScheduleFormOpen(false);
     refetch();
+  };
+
+  const handleSaveWhiteboardToLibrary = (imageUrl: string, title: string) => {
+    // Simulate saving to library_items table
+    // In a real app, you'd upload imageUrl to Supabase Storage and then insert a record.
+    showSuccess(`تم حفظ "${title}" في مكتبة الدروس (محاكاة).`);
+    // You might want to refetch library items here if you had a query for them
   };
 
   if (isLoading) {
@@ -290,6 +300,27 @@ const OnlineClasses = () => {
 
   const upcomingClasses = onlineClasses?.filter(cls => !isPast(parseISO(cls.start_time))).sort((a, b) => parseISO(a.start_time).getTime() - parseISO(b.start_time).getTime());
   const pastClasses = onlineClasses?.filter(cls => isPast(parseISO(cls.start_time))).sort((a, b) => parseISO(b.start_time).getTime() - parseISO(a.start_time).getTime());
+
+  if (activeWhiteboardSession) {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="flex items-center justify-between p-4 border-b">
+          <h3 className="text-xl font-bold">السبورة البيضاء للفصل: {activeWhiteboardSession.classId}</h3>
+          <Button variant="outline" onClick={() => setActiveWhiteboardSession(null)}>
+            العودة إلى الفصول
+          </Button>
+        </div>
+        <div className="flex-1">
+          <Whiteboard
+            classId={activeWhiteboardSession.classId}
+            sessionId={activeWhiteboardSession.sessionId}
+            isTeacher={activeWhiteboardSession.isTeacher}
+            onSaveToLibrary={handleSaveWhiteboardToLibrary}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -360,8 +391,15 @@ const OnlineClasses = () => {
                       <TableCell>{format(parseISO(cls.start_time), 'PPP p')}</TableCell>
                       <TableCell>{cls.platform}</TableCell>
                       <TableCell className="text-center">
-                        <Button variant="default" size="sm" onClick={() => window.open(cls.meeting_link, '_blank')}>
+                        <Button variant="default" size="sm" onClick={() => window.open(cls.meeting_link, '_blank')} className="mr-2">
                           <Video className="mr-2 h-4 w-4" /> انضم الآن
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setActiveWhiteboardSession({ classId: cls.class_id, sessionId: cls.id, isTeacher: userRole === 'Teacher' || userRole === 'Admin' })}
+                        >
+                          <WhiteboardIcon className="mr-2 h-4 w-4" /> السبورة
                         </Button>
                       </TableCell>
                     </TableRow>
